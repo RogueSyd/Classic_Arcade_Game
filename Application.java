@@ -1,5 +1,5 @@
 /*
-Pac-Man Application: Phase 1 Source
+Pac-Man Application: Phase 2 Source
 CMSC 495 
 Instructor: Shanna Kuchenbecker 
 John Borra, Sarah Drury, Oanh Woodworth, Yeng Veng, and Thayne Emery
