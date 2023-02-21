@@ -21,6 +21,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import javax.swing.JButton;
 import javax.swing.Timer;
 
 public class Application extends JPanel implements ActionListener 
@@ -168,7 +169,7 @@ public class Application extends JPanel implements ActionListener
         }
     }
 
-    private void showIntroScreen(Graphics2D g2d)                        //Phase1
+    private void showIntroScreen(Graphics2D g)                        //Phase1
     {      
         // Draw Pac-Man title
         g.setColor(Color.YELLOW);
@@ -570,12 +571,13 @@ public class Application extends JPanel implements ActionListener
                 req_dx = 0;
                 req_dy = 1;
                 break;
+            }
         }
 
         @Override
         public void keyReleased(KeyEvent e) 
         {
-            nt key = e.getKeyCode();
+            int key = e.getKeyCode();
             switch (key) {
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_RIGHT:
@@ -584,6 +586,7 @@ public class Application extends JPanel implements ActionListener
                     req_dx = 0;
                     req_dy = 0;
                     break;
+            }
         }
     }
 
