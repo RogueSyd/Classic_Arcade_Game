@@ -551,13 +551,39 @@ public class Application extends JPanel implements ActionListener
         @Override
         public void keyPressed(KeyEvent e) 
         {
-
+            int key = e.getKeyCode();
+            /*handle arrow key press*/
+            switch (key) {
+            case KeyEvent.VK_LEFT:
+                req_dx = -1;
+                req_dy = 0;
+                break;
+            case KeyEvent.VK_RIGHT:
+                req_dx = 1;
+                req_dy = 0;
+                break;
+            case KeyEvent.VK_UP:
+                req_dx = 0;
+                req_dy = -1;
+                break;
+            case KeyEvent.VK_DOWN:
+                req_dx = 0;
+                req_dy = 1;
+                break;
         }
 
         @Override
         public void keyReleased(KeyEvent e) 
         {
-            
+            nt key = e.getKeyCode();
+            switch (key) {
+                case KeyEvent.VK_LEFT:
+                case KeyEvent.VK_RIGHT:
+                case KeyEvent.VK_UP:
+                case KeyEvent.VK_DOWN:
+                    req_dx = 0;
+                    req_dy = 0;
+                    break;
         }
     }
 
