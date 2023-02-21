@@ -85,16 +85,30 @@ public class Application extends JPanel implements ActionListener
     private short[] screenData;
     private Timer timer;
 
+    private JButton startButton;
+    private JButton exitButton;
+    
     public Application()                                                //Phase1
     {
         loadImages();
         initVariables();    
         initBoard();
+        
+        //create Start and Exit Buttons
+        setLayout(null);
+        startButton = new JButton("Start");
+        startButton.setBounds(100, 150, 100, 30);
+        startButton.addActionListener(this);
+        add(startButton);
+
+        exitButton = new JButton("Exit");
+        exitButton.setBounds(100, 200, 100, 30);
+        exitButton.addActionListener(this);
+        add(exitButton);
     }
 
     private void initBoard()                                            //Phase1
     {      
-        addKeyListener(new TAdapter());
         setFocusable(true);
         setBackground(Color.black);
     }
@@ -156,18 +170,33 @@ public class Application extends JPanel implements ActionListener
 
     private void showIntroScreen(Graphics2D g2d)                        //Phase1
     {      
-        g2d.setColor(new Color(0, 32, 48));
-        g2d.fillRect(50, SCREEN_SIZE / 2 - 30, SCREEN_SIZE - 100, 50);
-        g2d.setColor(Color.white);
-        g2d.drawRect(50, SCREEN_SIZE / 2 - 30, SCREEN_SIZE - 100, 50);
+        // Draw Pac-Man title
+        g.setColor(Color.YELLOW);
+        Font titleFont = new Font("Helvetica", Font.BOLD, 48);
+        g.setFont(titleFont);
+        FontMetrics titleMetrics = g.getFontMetrics(titleFont);
+        String title = "Pac-Man";
+        g.drawString(title, (getWidth() - titleMetrics.stringWidth(title)) / 2, 
+        		getHeight() / 3);
+        
+        // Draw Start and Exit buttons
+        Font buttonFont = new Font("Helvetica", Font.PLAIN, 24);
+        g.setFont(buttonFont);
+        FontMetrics buttonMetrics = g.getFontMetrics(buttonFont);
 
-        String s = "Press s to start.";
-        Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = this.getFontMetrics(small);
+        startButton.setBounds((getWidth() - 200) / 2, getHeight() / 2, 100, 30);
+        exitButton.setBounds((getWidth() + 10) / 2, getHeight() / 2, 100, 30);
 
-        g2d.setColor(Color.white);
-        g2d.setFont(small);
-        g2d.drawString(s, (SCREEN_SIZE - metr.stringWidth(s)) / 2, SCREEN_SIZE / 2);
+        g.setColor(Color.YELLOW);
+        g.fillRect(startButton.getBounds().x, startButton.getBounds().y, 100, 30);
+        g.fillRect(exitButton.getBounds().x, exitButton.getBounds().y, 100, 30);
+
+        g.setColor(Color.BLACK);
+        g.drawString("Start", startButton.getBounds().x + (startButton.getWidth() - buttonMetrics.stringWidth("Start")) 
+        		/ 2, startButton.getBounds().y + (startButton.getHeight() + buttonMetrics.getAscent()) / 2);
+        g.drawString("Exit", exitButton.getBounds().x + (exitButton.getWidth() - buttonMetrics.stringWidth("Exit")) 
+        		/ 2, exitButton.getBounds().y + (exitButton.getHeight() + buttonMetrics.getAscent()) / 2);
+    
     }
 
     private void drawScore(Graphics2D g)                                //Phase1 
@@ -533,8 +562,17 @@ public class Application extends JPanel implements ActionListener
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) 
-    {
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == startButton) {
+        	requestFocusInWindow(); // set focus 
+            // Start the game
+        	inGame = true;
+            initGame();
+
+        } else if (e.getSource() == exitButton) {
+            // Exit the game
+            inGame = false;
+        }
         repaint();
     }
 }
