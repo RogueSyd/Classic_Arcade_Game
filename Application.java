@@ -29,7 +29,7 @@ public class Application extends JPanel implements ActionListener
     private Dimension d;
     private final Font smallFont = new Font("Helvetica", Font.BOLD,14);
 
-    private Image ii;
+    private Image img;
     private final Color dotColor = new Color(192, 192, 0);
     private Color mazeColor;
 
@@ -541,9 +541,41 @@ public class Application extends JPanel implements ActionListener
         doDrawing(g);
     }
 
-    private void doDrawing(Graphics g) 
+    private void doDrawing(Graphics g)                          //Phase 3 Sarah Drury
     {
 
+    	//Create graphic object
+    	Graphics2D g2D;
+    	g2D = (Graphics2D) g;
+
+    	// Set color to black
+        g2D.setPaint(Color.black);
+
+        // Calls functions to draw maze
+        drawMaze(g2D);
+        
+        // Calls function to draw score
+        drawScore(g2D);
+        
+        // Calls function to animate
+        doAnim();
+
+        // Checks if PacMan is alive and has any lives left
+        if (inGame == true) 
+        {
+            playGame(g2D);
+        } 
+        // If no lives left, exit to intro screen
+        else 
+        {
+            showIntroScreen(g2D);
+        }
+ 
+        // Draws image at specific location
+        g2D.drawImage(img, 1, 1, this);
+        
+        // Dispose graphics context 
+        g2D.dispose();
     }
 
     class TAdapter extends KeyAdapter 
