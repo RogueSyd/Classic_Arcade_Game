@@ -456,9 +456,6 @@ public class Application extends JPanel implements ActionListener
 
         pacman_y = pacman_y + PACMAN_SPEED * pacmand_y;
     }
-
-
-    }
     
     private void drawPacman(Graphics2D g2d)                             //Phase2
     {
