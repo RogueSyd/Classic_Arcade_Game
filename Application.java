@@ -70,14 +70,14 @@ public class Application extends JPanel implements ActionListener
     {
             19, 26, 26, 26, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 22,
             21, 0, 0, 0, 17, 16, 16, 16, 16, 16, 16, 16, 16, 16, 20,
-            21, 0, 0, 0, 17, 16, 16, 16, 16, 16, 16, 16, 16, 16, 20,
-            21, 0, 0, 0, 17, 16, 16, 24, 16, 16, 16, 16, 16, 16, 20,
-            17, 18, 18, 18, 16, 16, 20, 0, 17, 16, 16, 16, 16, 16, 20,
-            17, 16, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 16, 24, 20,
-            25, 16, 16, 16, 24, 24, 28, 0, 25, 24, 24, 16, 20, 0, 21,
-            1, 17, 16, 20, 0, 0, 0, 0, 0, 0, 0, 17, 20, 0, 21,
-            1, 17, 16, 16, 18, 18, 22, 0, 19, 18, 18, 16, 20, 0, 21,
-            1, 17, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 20, 0, 21,
+            21, 0, 0, 0, 17, 16, 16, 16, 16, 16, 16, 16, 16, 24, 20,
+            21, 0, 0, 0, 17, 16, 16, 24, 16, 16, 16, 16, 20, 0, 21,
+            17, 18, 18, 18, 16, 16, 20, 0, 17, 16, 16, 16, 28, 0, 21,
+            17, 16, 16, 16, 16, 16, 20, 0, 17, 16, 16, 20, 0,  0, 21,
+            25, 16, 16, 16, 24, 24, 28, 0, 25, 24, 24, 16, 18, 18, 28,
+            10, 16, 16, 20, 0, 0, 0, 0, 0, 0, 0, 17, 16, 16, 10,
+            19, 16, 16, 16, 18, 18, 22, 0, 19, 18, 18, 16, 16, 24, 22,
+            25, 16, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 20, 0, 21,
             1, 17, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 20, 0, 21,
             1, 17, 16, 16, 16, 16, 16, 18, 16, 16, 16, 16, 20, 0, 21,
             1, 17, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 20, 0, 21,
@@ -427,15 +427,13 @@ public class Application extends JPanel implements ActionListener
             }
         }
         
-        // Pacman left-to-right teleport at blocks_y 0-6
-        if (pacman_x == BLOCK_SIZE * 0 && pacman_y <= BLOCK_SIZE * 6
-                && pacman_y >= BLOCK_SIZE * 0 && view_dx == -1)
+        // Pacman left-to-right teleport at tunnel
+        if (pacman_x == BLOCK_SIZE * 0 && pacman_y == BLOCK_SIZE * 7 && view_dx == -1)
         {
             pacman_x = BLOCK_SIZE * 14 + pacman_x + PACMAN_SPEED * pacmand_x;
         }
-        // Pacman right-to-left teleport at blocks_y 0-6
-        else if (pacman_x == BLOCK_SIZE * 14 && pacman_y <= BLOCK_SIZE * 6
-                    && pacman_y >= BLOCK_SIZE * 0 && view_dx == 1)
+        // Pacman right-to-left teleport at tunnel
+        else if (pacman_x == BLOCK_SIZE * 14 && pacman_y == BLOCK_SIZE * 7 && view_dx == 1)
         {
             pacman_x = -BLOCK_SIZE * 14 + pacman_x + PACMAN_SPEED * pacmand_x;
         }
@@ -445,23 +443,10 @@ public class Application extends JPanel implements ActionListener
             pacman_x = pacman_x + PACMAN_SPEED * pacmand_x;
         }
 
-        // Pacman top-to-bottom teleport at blocks_x 10-14
-        if (pacman_y == BLOCK_SIZE * 0 && pacman_x <= BLOCK_SIZE * 14
-                && pacman_x >= BLOCK_SIZE * 10 && view_dy == -1)
-        {
-            pacman_y = BLOCK_SIZE * 14 + pacman_y + PACMAN_SPEED * pacmand_y;
-        }
-        // Pacman bottom-to-top teleport at blocks_x 10-14
-        else if (pacman_y == BLOCK_SIZE * 14 && pacman_x <= BLOCK_SIZE * 14
-                    && pacman_x >= BLOCK_SIZE * 10 && view_dy == 1)
-        {
-            pacman_y = -BLOCK_SIZE * 14 + pacman_y + PACMAN_SPEED * pacmand_y;
-        }
-        // Normal Pacman vertical movement
-        else
-        {
-            pacman_y = pacman_y + PACMAN_SPEED * pacmand_y;
-        }
+        pacman_y = pacman_y + PACMAN_SPEED * pacmand_y;
+    }
+
+
     }
     
     private void drawPacman(Graphics2D g2d)                             //Phase2
