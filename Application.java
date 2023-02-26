@@ -1,5 +1,5 @@
 /*
-Pac-Man Application: Phase 2 Source
+Pac-Man Application: Phase 3 Source
 CMSC 495 
 Instructor: Shanna Kuchenbecker 
 John Borra, Sarah Drury, Oanh Woodworth, Yeng Veng, and Thayne Emery
@@ -773,6 +773,8 @@ public class Application extends JPanel implements ActionListener
         	requestFocusInWindow(); // set focus        
         	inGame = true;// Start the game
             initGame();
+            startButton.setVisible(false);
+            exitButton.setVisible(false);
 
         } else if (e.getSource() == exitButton) {
             inGame = false; // Exit the game
