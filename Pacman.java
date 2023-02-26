@@ -19,6 +19,7 @@ public class Pacman extends JFrame
         add(new Application());
         setTitle("Group 2 Pacman Application");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
         setSize(380, 420);
         setLocationRelativeTo(null);
     }
