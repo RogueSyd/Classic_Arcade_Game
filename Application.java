@@ -74,9 +74,9 @@ public class Application extends JPanel implements ActionListener
             21, 0, 0, 0, 17, 16, 16, 24, 16, 16, 16, 16, 20, 0, 21,
             17, 18, 18, 18, 16, 16, 20, 0, 17, 16, 16, 16, 28, 0, 21,
             17, 16, 16, 16, 16, 16, 20, 0, 17, 16, 16, 20, 0,  0, 21,
-            25, 16, 16, 16, 24, 24, 28, 0, 25, 24, 24, 16, 18, 18, 28,
-            10, 16, 16, 20, 0, 0, 0, 0, 0, 0, 0, 17, 16, 16, 10,
-            19, 16, 16, 16, 18, 18, 22, 0, 19, 18, 18, 16, 16, 24, 22,
+            25, 24, 16, 16, 16, 24, 28, 0, 25, 24, 16, 16, 18, 26, 28,
+            10, 10, 16, 16, 20, 0, 0, 0, 0, 0, 17, 16, 16, 10, 10,
+            19, 18, 16, 16, 16, 18, 22, 0, 19, 18, 16, 16, 16, 26, 22,
             25, 16, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 20, 0, 21,
             1, 17, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 20, 0, 21,
             1, 17, 16, 16, 16, 16, 16, 18, 16, 16, 16, 16, 20, 0, 21,
@@ -329,6 +329,17 @@ public class Application extends JPanel implements ActionListener
                     ghost_dx[n] = dx[count];
                     ghost_dy[n] = dy[count];
                 }
+            }
+            
+            // Ghost left-to-right teleport at tunnel
+            if (ghost_x[n] / BLOCK_SIZE <= 0 && ghost_y[n] / BLOCK_SIZE == 7 && ghost_dx[n] == -1)
+            {
+                ghost_x[n] = BLOCK_SIZE * 14 + ghost_x[n] + (ghost_dx[n] * ghostSpeed[n]);
+            }
+            // Ghost right-to-left teleport at tunnel
+            else if (ghost_x[n] / BLOCK_SIZE >= 14 && ghost_y[n] / BLOCK_SIZE == 7 && ghost_dx[n] == 1)
+            {
+                ghost_x[n] = -BLOCK_SIZE * 14 + ghost_x[n] + (ghost_dx[n] * ghostSpeed[n]);
             }
 
             ghost_x[n] = ghost_x[n] + (ghost_dx[n] * ghostSpeed[n]);
