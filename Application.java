@@ -569,8 +569,8 @@ public class Application extends JPanel implements ActionListener
         {
             for (x = 0; x < SCREEN_SIZE; x += BLOCK_SIZE) 
             {
-                g2d.setColor(mazeColor);
-                g2d.setStroke(new BasicStroke(2));
+                g2d.setColor(new Color(120, 160, 255)); // sets color to light blue
+            	g2d.setStroke(new BasicStroke(5));//uses stroke of 5 pixels wide
 
                 if ((screenData[i] & 1) != 0) 
                 {
@@ -739,6 +739,7 @@ public class Application extends JPanel implements ActionListener
                 else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) 
                 {
                     inGame = false;
+                    System.exit(0); // Terminate the program
                 } 
                 else if (key == KeyEvent.VK_PAUSE) 
                 {
