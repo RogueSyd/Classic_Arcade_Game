@@ -26,7 +26,7 @@ import javax.swing.Timer;
 
 public class Application extends JPanel implements ActionListener 
 {
-    private Dimension d;
+    private Dimension dimension;
     private final Font smallFont = new Font("Helvetica", Font.BOLD,14);
 
     private Image img;
@@ -35,7 +35,8 @@ public class Application extends JPanel implements ActionListener
 
     private boolean inGame = false;
     private boolean dying = false;
-
+    
+    //identify constant variables
     private final int BLOCK_SIZE = 24;
     private final int N_BLOCKS = 15;
     private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
@@ -43,7 +44,8 @@ public class Application extends JPanel implements ActionListener
     private final int PACMAN_ANIM_COUNT = 4;
     private final int MAX_GHOSTS = 12;
     private final int PACMAN_SPEED = 6;
-
+    
+    private int numHeartsCollected;
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
     private int pacmanAnimPos = 0;
@@ -60,6 +62,10 @@ public class Application extends JPanel implements ActionListener
     private int pacman_x, pacman_y, pacmand_x, pacmand_y;
     private int req_dx, req_dy, view_dx, view_dy;
 
+    // Define an array to store the heart locations
+    private static final int[] HEART_LOCATIONS = {0, 28, 90, 200};
+    private boolean[] heartCollected = new boolean[HEART_LOCATIONS.length];
+    
     private final short levelData[] = 
     {
             19, 26, 26, 26, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 22,
@@ -94,7 +100,7 @@ public class Application extends JPanel implements ActionListener
         loadImages();
         initVariables();    
         initBoard();
-        
+        addKeyListener(new TAdapter());//add keys controler
         //create Start and Exit Buttons
         setLayout(null);
         startButton = new JButton("Start");
@@ -111,14 +117,14 @@ public class Application extends JPanel implements ActionListener
     private void initBoard()                                            //Phase1
     {      
         setFocusable(true);
-        setBackground(Color.black);
+        setBackground(Color.black);//set background color to black
     }
 
     private void initVariables()                                        //Phase1
     {      
         screenData = new short[N_BLOCKS * N_BLOCKS];
         mazeColor = new Color(5, 100, 5);
-        d = new Dimension(400, 400);
+        dimension = new Dimension(400, 400);
         ghost_x = new int[MAX_GHOSTS];
         ghost_dx = new int[MAX_GHOSTS];
         ghost_y = new int[MAX_GHOSTS];
@@ -178,8 +184,8 @@ public class Application extends JPanel implements ActionListener
         FontMetrics titleMetrics = g.getFontMetrics(titleFont);
         String title = "Pac-Man";
         g.drawString(title, (getWidth() - titleMetrics.stringWidth(title)) / 2, 
-        		getHeight() / 3);
-        
+        		getHeight() / 3);//draw the title
+                
         // Draw Start and Exit buttons
         Font buttonFont = new Font("Helvetica", Font.PLAIN, 24);
         g.setFont(buttonFont);
@@ -337,7 +343,37 @@ public class Application extends JPanel implements ActionListener
             }
         }
     }
-
+    
+    //method draws heart images
+    private void drawHearts(Graphics2D g2d) {                      //phase3
+        Image heartImage = heart;
+        // loop to draw 4 hearts 
+        for (int i = 0; i < HEART_LOCATIONS.length; i++) {
+            int location = HEART_LOCATIONS[i];
+            if (location != -1 && !heartCollected[i]) {
+                int row = location / N_BLOCKS;
+                int col = location % N_BLOCKS;
+                int x = col * BLOCK_SIZE + BLOCK_SIZE / 2;
+                int y = row * BLOCK_SIZE + BLOCK_SIZE / 2;
+                //if the character collides with the heart
+                if (pacman_x == x && pacman_y == y) {
+                    if ((screenData[location] & 32) == 0) {
+                        score += 50; // Add 50 points
+                        heartCollected[i] = true; // Set the heart as collected
+                        //executes it if the heart hasn't been collected yet
+                        screenData[location] &= ~16;
+                        numHeartsCollected++;
+                    }
+                } else {
+                    // Draw the heart image only if it hasn't been collected yet
+                    if ((screenData[location] & 16) != 0) {
+                        g2d.drawImage(heartImage, col * BLOCK_SIZE, row * BLOCK_SIZE, this);
+                    }
+                }
+            }
+        }
+    }
+    
     private void drawGhost(Graphics2D g2d, int x, int y)                //Phase2
     {
         g2d.drawImage(ghost, x, y, this);
@@ -394,7 +430,7 @@ public class Application extends JPanel implements ActionListener
         pacman_x = pacman_x + PACMAN_SPEED * pacmand_x;
         pacman_y = pacman_y + PACMAN_SPEED * pacmand_y;
     }
-
+    
     private void drawPacman(Graphics2D g2d)                             //Phase2
     {
         if (view_dx == -1) 
@@ -505,16 +541,22 @@ public class Application extends JPanel implements ActionListener
         currentSpeed = 3;
     }
 
-    private void initLevel() 
-    {
-
+    private void initLevel() {
+        int i;
+        for (i = 0; i < N_BLOCKS * N_BLOCKS; i++) {
+            screenData[i] = levelData[i];
+        }
+        // Reset the heartCollected array
+        heartCollected = new boolean[HEART_LOCATIONS.length]; 
+        continueLevel();
     }
 
     private void continueLevel() 
     {
 
     }
-
+    
+    //method to load all images
     private void loadImages() 
     {
         ghost = new ImageIcon("src/ghost.gif").getImage();
@@ -541,74 +583,68 @@ public class Application extends JPanel implements ActionListener
         doDrawing(g);
     }
 
-    private void doDrawing(Graphics g)                          //Phase 3 Sarah Drury
-    {
-
+    private void doDrawing(Graphics g){                      //Phase 3 
     	//Create graphic object
     	Graphics2D g2D;
     	g2D = (Graphics2D) g;
-
     	// Set color to black
         g2D.setPaint(Color.black);
-
-        // Calls functions to draw maze
-        drawMaze(g2D);
-        
-        // Calls function to draw score
-        drawScore(g2D);
-        
-        // Calls function to animate
-        doAnim();
-
+        drawMaze(g2D); // Calls functions to draw maze      
+        drawScore(g2D); // Calls function to draw score              
+        doAnim(); // Calls function to animate
         // Checks if PacMan is alive and has any lives left
-        if (inGame == true) 
-        {
+        if (inGame == true) {
             playGame(g2D);
+            drawHearts(g2D); 
         } 
         // If no lives left, exit to intro screen
-        else 
-        {
+        else {
             showIntroScreen(g2D);
-        }
- 
-        // Draws image at specific location
-        g2D.drawImage(img, 1, 1, this);
-        
-        // Dispose graphics context 
-        g2D.dispose();
+        }     
+        g2D.drawImage(img, 1, 1, this); // Draws image at specific location   
+        g2D.dispose(); // Dispose graphics context 
     }
 
-    class TAdapter extends KeyAdapter 
-    {
-
-        @Override
-        public void keyPressed(KeyEvent e) 
-        {
+    class TAdapter extends KeyAdapter {
+    @Override
+    	public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
-            /*handle arrow key press*/
-            switch (key) {
-            case KeyEvent.VK_LEFT:
-                req_dx = -1;
-                req_dy = 0;
-                break;
-            case KeyEvent.VK_RIGHT:
-                req_dx = 1;
-                req_dy = 0;
-                break;
-            case KeyEvent.VK_UP:
-                req_dx = 0;
-                req_dy = -1;
-                break;
-            case KeyEvent.VK_DOWN:
-                req_dx = 0;
-                req_dy = 1;
-                break;
-            }
+            if (inGame) {
+                switch (key) {
+                    case KeyEvent.VK_LEFT:
+                        req_dx = -1;
+                        req_dy = 0;
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        req_dx = 1;
+                        req_dy = 0;
+                        break;
+                    case KeyEvent.VK_UP:
+                        req_dx = 0;
+                        req_dy = -1;
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        req_dx = 0;
+                        req_dy = 1;
+                        break;
+                    case KeyEvent.VK_ESCAPE:
+                        if (timer.isRunning()) {
+                            inGame = false;//exit game
+                            System.exit(0); // Terminate the program
+                        }
+                        break;
+                    case KeyEvent.VK_SPACE:
+                        if (timer.isRunning()) {
+                            timer.stop();//pause the game
+                        } else {
+                            timer.start();//continue game
+                        }
+                        break;
+                }
+            } 
         }
-
         @Override
-        public void keyReleased(KeyEvent e) 
-        {
+        public void keyReleased(KeyEvent e) {
             int key = e.getKeyCode();
             switch (key) {
                 case KeyEvent.VK_LEFT:
@@ -625,14 +661,13 @@ public class Application extends JPanel implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == startButton) {
-        	requestFocusInWindow(); // set focus 
-            // Start the game
-        	inGame = true;
+        	requestFocusInWindow(); // set focus        
+        	inGame = true;// Start the game
             initGame();
 
         } else if (e.getSource() == exitButton) {
-            // Exit the game
-            inGame = false;
+            inGame = false; // Exit the game
+            System.exit(0); // Terminate the program
         }
         repaint();
     }
