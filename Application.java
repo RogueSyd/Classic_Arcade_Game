@@ -26,10 +26,10 @@ import javax.swing.Timer;
 
 public class Application extends JPanel implements ActionListener 
 {
-    private Dimension dimension;
+    private Dimension d;
     private final Font smallFont = new Font("Helvetica", Font.BOLD,14);
 
-    private Image img;
+    private Image ii;
     private final Color dotColor = new Color(192, 192, 0);
     private Color mazeColor;
 
@@ -124,7 +124,7 @@ public class Application extends JPanel implements ActionListener
     {      
         screenData = new short[N_BLOCKS * N_BLOCKS];
         mazeColor = new Color(5, 100, 5);
-        dimension = new Dimension(400, 400);
+        d = new Dimension(400, 400);
         ghost_x = new int[MAX_GHOSTS];
         ghost_dx = new int[MAX_GHOSTS];
         ghost_y = new int[MAX_GHOSTS];
@@ -562,7 +562,46 @@ public class Application extends JPanel implements ActionListener
 
     private void drawMaze(Graphics2D g2d) 
     {
+        short i = 0;
+        int x, y;
 
+        for (y = 0; y < SCREEN_SIZE; y += BLOCK_SIZE) 
+        {
+            for (x = 0; x < SCREEN_SIZE; x += BLOCK_SIZE) 
+            {
+                g2d.setColor(mazeColor);
+                g2d.setStroke(new BasicStroke(2));
+
+                if ((screenData[i] & 1) != 0) 
+                {
+                    g2d.drawLine(x, y, x, y + BLOCK_SIZE - 1);
+                }
+
+                if ((screenData[i] & 2) != 0) 
+                {
+                    g2d.drawLine(x, y, x + BLOCK_SIZE - 1, y);
+                }
+
+                if ((screenData[i] & 4) != 0) 
+                {
+                    g2d.drawLine(x + BLOCK_SIZE - 1, y, x + BLOCK_SIZE - 1,
+                            y + BLOCK_SIZE - 1);
+                }
+
+                if ((screenData[i] & 8) != 0) 
+                {
+                    g2d.drawLine(x, y + BLOCK_SIZE - 1, x + BLOCK_SIZE - 1,
+                            y + BLOCK_SIZE - 1);
+                }
+
+                if ((screenData[i] & 16) != 0) 
+                {
+                    g2d.setColor(dotColor);
+                    g2d.fillRect(x + 11, y + 11, 2, 2);
+                }
+                i++;
+            }
+        }
     }
 
     private void initGame() 
@@ -586,7 +625,36 @@ public class Application extends JPanel implements ActionListener
 
     private void continueLevel() 
     {
+        short i;
+        int dx = 1;
+        int random;
 
+        for (i = 0; i < N_GHOSTS; i++) 
+        {
+            ghost_y[i] = 4 * BLOCK_SIZE;
+            ghost_x[i] = 4 * BLOCK_SIZE;
+            ghost_dy[i] = 0;
+            ghost_dx[i] = dx;
+            dx = -dx;
+            random = (int) (Math.random() * (currentSpeed + 1));
+
+            if (random > currentSpeed) 
+            {
+                random = currentSpeed;
+            }
+
+            ghostSpeed[i] = validSpeeds[random];
+        }
+
+        pacman_x = 7 * BLOCK_SIZE;
+        pacman_y = 11 * BLOCK_SIZE;
+        pacmand_x = 0;
+        pacmand_y = 0;
+        req_dx = 0;
+        req_dy = 0;
+        view_dx = -1;
+        view_dy = 0;
+        dying = false;
     }
     
     //method to load all images
@@ -617,76 +685,83 @@ public class Application extends JPanel implements ActionListener
     }
 
     private void doDrawing(Graphics g){                      //Phase 3 
-    	//Create graphic object
-    	Graphics2D g2D;
-    	g2D = (Graphics2D) g;
-    	// Set color to black
-        g2D.setPaint(Color.black);
-        drawMaze(g2D); // Calls functions to draw maze      
-        drawScore(g2D); // Calls function to draw score              
-        doAnim(); // Calls function to animate
-        // Checks if PacMan is alive and has any lives left
-        if (inGame == true) {
-            playGame(g2D);
-            drawHearts(g2D); 
+    	Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setColor(Color.black);
+        g2d.fillRect(0, 0, d.width, d.height);
+
+        drawMaze(g2d);
+        drawScore(g2d);
+        doAnim();
+
+        if (inGame) 
+        {
+            playGame(g2d);
+            drawHearts(g2d);
         } 
-        // If no lives left, exit to intro screen
-        else {
-            showIntroScreen(g2D);
-        }     
-        g2D.drawImage(img, 1, 1, this); // Draws image at specific location   
-        g2D.dispose(); // Dispose graphics context 
+        else 
+        {
+            showIntroScreen(g2d);
+        }
+
+        g2d.drawImage(ii, 5, 5, this);
+        Toolkit.getDefaultToolkit().sync();
+        g2d.dispose();
     }
 
     class TAdapter extends KeyAdapter {
     @Override
     	public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
-            if (inGame) {
-                switch (key) {
-                    case KeyEvent.VK_LEFT:
-                        req_dx = -1;
-                        req_dy = 0;
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        req_dx = 1;
-                        req_dy = 0;
-                        break;
-                    case KeyEvent.VK_UP:
-                        req_dx = 0;
-                        req_dy = -1;
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        req_dx = 0;
-                        req_dy = 1;
-                        break;
-                    case KeyEvent.VK_ESCAPE:
-                        if (timer.isRunning()) {
-                            inGame = false;//exit game
-                            System.exit(0); // Terminate the program
-                        }
-                        break;
-                    case KeyEvent.VK_SPACE:
-                        if (timer.isRunning()) {
-                            timer.stop();//pause the game
-                        } else {
-                            timer.start();//continue game
-                        }
-                        break;
+
+            if (inGame) 
+            {
+                if (key == KeyEvent.VK_LEFT) 
+                {
+                    req_dx = -1;
+                    req_dy = 0;
+                } 
+                else if (key == KeyEvent.VK_RIGHT) 
+                {
+                    req_dx = 1;
+                    req_dy = 0;
+                } 
+                else if (key == KeyEvent.VK_UP) 
+                {
+                    req_dx = 0;
+                    req_dy = -1;
+                } 
+                else if (key == KeyEvent.VK_DOWN) 
+                {
+                    req_dx = 0;
+                    req_dy = 1;
+                } 
+                else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) 
+                {
+                    inGame = false;
+                } 
+                else if (key == KeyEvent.VK_PAUSE) 
+                {
+                    if (timer.isRunning()) 
+                    {
+                        timer.stop();
+                    } 
+                    else 
+                    {
+                        timer.start();
+                    }
                 }
-            } 
+            }          
         }
         @Override
         public void keyReleased(KeyEvent e) {
             int key = e.getKeyCode();
-            switch (key) {
-                case KeyEvent.VK_LEFT:
-                case KeyEvent.VK_RIGHT:
-                case KeyEvent.VK_UP:
-                case KeyEvent.VK_DOWN:
-                    req_dx = 0;
-                    req_dy = 0;
-                    break;
+
+            if (key == Event.LEFT || key == Event.RIGHT
+                    || key == Event.UP || key == Event.DOWN) 
+            {
+                req_dx = 0;
+                req_dy = 0;
             }
         }
     }
@@ -705,3 +780,4 @@ public class Application extends JPanel implements ActionListener
         repaint();
     }
 }
+
