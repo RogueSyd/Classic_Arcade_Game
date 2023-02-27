@@ -26,10 +26,10 @@ import javax.swing.Timer;
 
 public class Application extends JPanel implements ActionListener 
 {
-    private Dimension d;
+    private Dimension dimension;
     private final Font smallFont = new Font("Helvetica", Font.BOLD,14);
 
-    private Image ii;
+    private Image image;
     private final Color dotColor = new Color(192, 192, 0);
     private Color mazeColor;
 
@@ -44,8 +44,7 @@ public class Application extends JPanel implements ActionListener
     private final int PACMAN_ANIM_COUNT = 4;
     private final int MAX_GHOSTS = 12;
     private final int PACMAN_SPEED = 6;
-    
-    private int numHeartsCollected;
+   
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
     private int pacmanAnimPos = 0;
@@ -54,7 +53,7 @@ public class Application extends JPanel implements ActionListener
     private int[] dx, dy;
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
 
-    private Image ghost,heart;
+    private Image ghost,heart, cherry;
     private Image pacman1, pacman2up, pacman2left, pacman2right, pacman2down;
     private Image pacman3up, pacman3down, pacman3left, pacman3right;
     private Image pacman4up, pacman4down, pacman4left, pacman4right;
@@ -63,8 +62,8 @@ public class Application extends JPanel implements ActionListener
     private int req_dx, req_dy, view_dx, view_dy;
 
     // Define an array to store the heart locations
-    private static final int[] HEART_LOCATIONS = {0, 28, 90, 200};
-    private boolean[] heartCollected = new boolean[HEART_LOCATIONS.length];
+    private static final int[] CHERRY_LOCATIONS = {0, 28, 90, 220};
+    private boolean[] cherryCollected = new boolean[CHERRY_LOCATIONS.length];
     
     private final short levelData[] = 
     {
@@ -94,6 +93,7 @@ public class Application extends JPanel implements ActionListener
 
     private JButton startButton;
     private JButton exitButton;
+    private int numCherriesCollected;
     
     public Application()                                                //Phase1
     {
@@ -101,6 +101,7 @@ public class Application extends JPanel implements ActionListener
         initVariables();    
         initBoard();
         addKeyListener(new TAdapter());//add keys controler
+        
         //create Start and Exit Buttons
         setLayout(null);
         startButton = new JButton("Start");
@@ -124,15 +125,15 @@ public class Application extends JPanel implements ActionListener
     {      
         screenData = new short[N_BLOCKS * N_BLOCKS];
         mazeColor = new Color(5, 100, 5);
-        d = new Dimension(400, 400);
+        dimension = new Dimension(400, 400);
         ghost_x = new int[MAX_GHOSTS];
         ghost_dx = new int[MAX_GHOSTS];
         ghost_y = new int[MAX_GHOSTS];
         ghost_dy = new int[MAX_GHOSTS];
         ghostSpeed = new int[MAX_GHOSTS];
         dx = new int[4];
-        dy = new int[4];
-
+        dy = new int[4];  
+        //set up timer every 40ms
         timer = new Timer(40, this);
         timer.start();
     }
@@ -179,10 +180,10 @@ public class Application extends JPanel implements ActionListener
     {      
         // Draw Pac-Man title
         g.setColor(Color.YELLOW);
-        Font titleFont = new Font("Helvetica", Font.BOLD, 48);
+        Font titleFont = new Font("Helvetica", Font.BOLD, 48);//set the font
         g.setFont(titleFont);
         FontMetrics titleMetrics = g.getFontMetrics(titleFont);
-        String title = "Pac-Man";
+        String title = "Pac-Man"; 
         g.drawString(title, (getWidth() - titleMetrics.stringWidth(title)) / 2, 
         		getHeight() / 3);//draw the title
                 
@@ -218,6 +219,14 @@ public class Application extends JPanel implements ActionListener
 
         for (i = 0; i < pacsLeft; i++) {
             g.drawImage(heart, i * 28 + 8, SCREEN_SIZE + 1, this);
+        }
+        // check if the character is on a cherry
+        int cherryIndex = isOnCherry();
+        if (cherryIndex != -1 && !cherryCollected[cherryIndex]) {
+            // add 50 points and set the cherry as collected
+            score += 50;
+            cherryCollected[cherryIndex] = true;
+            screenData[CHERRY_LOCATIONS[cherryIndex]] &= ~16;
         }
     }
 
@@ -355,13 +364,30 @@ public class Application extends JPanel implements ActionListener
         }
     }
     
-    //method draws heart images
-    private void drawHearts(Graphics2D g2d) {                      //phase3
-        Image heartImage = heart;
-        // loop to draw 4 hearts 
-        for (int i = 0; i < HEART_LOCATIONS.length; i++) {
-            int location = HEART_LOCATIONS[i];
-            if (location != -1 && !heartCollected[i]) {
+    // method to check if the character is on a cherry location
+    private int isOnCherry() {
+        int pacRow = pacman_y / BLOCK_SIZE;
+        int pacCol = pacman_x / BLOCK_SIZE;
+        for (int i = 0; i < CHERRY_LOCATIONS.length; i++) {
+            int location = CHERRY_LOCATIONS[i];
+            if (location != -1 && !cherryCollected[i]) {
+                int row = location / N_BLOCKS;
+                int col = location % N_BLOCKS;
+                if (pacRow == row && pacCol == col) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+    
+    //method draws cherry images
+    private void drawCherries(Graphics2D g2d) {                      //phase3
+        Image cherryImage = cherry;
+        // loop to draw 4 cherries
+        for (int i = 0; i < CHERRY_LOCATIONS.length; i++) {
+            int location = CHERRY_LOCATIONS[i];
+            if (location != -1 && !cherryCollected[i]) {
                 int row = location / N_BLOCKS;
                 int col = location % N_BLOCKS;
                 int x = col * BLOCK_SIZE + BLOCK_SIZE / 2;
@@ -370,15 +396,15 @@ public class Application extends JPanel implements ActionListener
                 if (pacman_x == x && pacman_y == y) {
                     if ((screenData[location] & 32) == 0) {
                         score += 50; // Add 50 points
-                        heartCollected[i] = true; // Set the heart as collected
-                        //executes it if the heart hasn't been collected yet
+                        cherryCollected[i] = true; // Set the cherry as collected
+                        //executes it if the cherry hasn't been collected yet
                         screenData[location] &= ~16;
-                        numHeartsCollected++;
+                        numCherriesCollected++;
                     }
                 } else {
-                    // Draw the heart image only if it hasn't been collected yet
+                    // Draw the cherry image only if it hasn't been collected yet
                     if ((screenData[location] & 16) != 0) {
-                        g2d.drawImage(heartImage, col * BLOCK_SIZE, row * BLOCK_SIZE, this);
+                        g2d.drawImage(cherryImage, col * BLOCK_SIZE, row * BLOCK_SIZE, this);
                     }
                 }
             }
@@ -611,8 +637,8 @@ public class Application extends JPanel implements ActionListener
         for (i = 0; i < N_BLOCKS * N_BLOCKS; i++) {
             screenData[i] = levelData[i];
         }
-        // Reset the heartCollected array
-        heartCollected = new boolean[HEART_LOCATIONS.length]; 
+        // Reset the cherryCollected array
+        cherryCollected = new boolean[CHERRY_LOCATIONS.length]; 
         continueLevel();
     }
 
@@ -654,6 +680,7 @@ public class Application extends JPanel implements ActionListener
     private void loadImages() 
     {
         ghost = new ImageIcon("src/ghost.gif").getImage();
+        cherry = new ImageIcon("src/cherries.png").getImage();
         pacman1 = new ImageIcon("src/pacman.png").getImage();
         heart = new ImageIcon("src/heart.png").getImage();
         pacman2up = new ImageIcon("src/up1.png").getImage();
@@ -681,7 +708,7 @@ public class Application extends JPanel implements ActionListener
     	Graphics2D g2d = (Graphics2D) g;
 
         g2d.setColor(Color.black);
-        g2d.fillRect(0, 0, d.width, d.height);
+        g2d.fillRect(0, 0, dimension.width, dimension.height);
 
         drawMaze(g2d);
         drawScore(g2d);
@@ -690,14 +717,14 @@ public class Application extends JPanel implements ActionListener
         if (inGame) 
         {
             playGame(g2d);
-            drawHearts(g2d);
+            drawCherries(g2d);
         } 
         else 
         {
             showIntroScreen(g2d);
         }
 
-        g2d.drawImage(ii, 5, 5, this);
+        g2d.drawImage(image, 5, 5, this);
         Toolkit.getDefaultToolkit().sync();
         g2d.dispose();
     }
@@ -732,7 +759,6 @@ public class Application extends JPanel implements ActionListener
                 else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) 
                 {
                     inGame = false;
-                    System.exit(0); // Terminate the program
                 } 
                 else if (key == KeyEvent.VK_PAUSE) 
                 {
