@@ -37,19 +37,23 @@ public class Application extends JPanel implements ActionListener
     private boolean dying = false;
     
     //identify constant variables
+    // how big a block is in the game
     private final int BLOCK_SIZE = 24;
+    //how many blocks horizontally and vertically. so 15 block by 15
     private final int N_BLOCKS = 15;
     private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
     private final int PAC_ANIM_DELAY = 2;
     private final int PACMAN_ANIM_COUNT = 4;
     private final int MAX_GHOSTS = 12;
-    private final int PACMAN_SPEED = 6;
+    private final int PACMAN_SPEED = 4; //Changed speed of Pac-Man since he was to speedy to control.
    
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
     private int pacmanAnimPos = 0;
     private int N_GHOSTS = 6;
     private int pacsLeft, score;
+    
+    //position of ghosts
     private int[] dx, dy;
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
 
@@ -57,7 +61,8 @@ public class Application extends JPanel implements ActionListener
     private Image pacman1, pacman2up, pacman2left, pacman2right, pacman2down;
     private Image pacman3up, pacman3down, pacman3left, pacman3right;
     private Image pacman4up, pacman4down, pacman4left, pacman4right;
-
+    
+    //Pac-Man's position
     private int pacman_x, pacman_y, pacmand_x, pacmand_y;
     private int req_dx, req_dy, view_dx, view_dy;
 
@@ -65,6 +70,7 @@ public class Application extends JPanel implements ActionListener
     private static final int[] CHERRY_LOCATIONS = {0, 28, 90, 220};
     private boolean[] cherryCollected = new boolean[CHERRY_LOCATIONS.length];
     
+    //Map data for the game.
     private final short levelData[] = 
     {
             19, 26, 26, 26, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 22,
@@ -95,12 +101,15 @@ public class Application extends JPanel implements ActionListener
     private JButton exitButton;
     private int numCherriesCollected;
     
+    /**
+     * Constructor
+     */
     public Application()                                                //Phase1
     {
         loadImages();
         initVariables();    
         initBoard();
-        addKeyListener(new TAdapter());//add keys controler
+        addKeyListener(new TAdapter());//add keys controller
         
         //create Start and Exit Buttons
         setLayout(null);
@@ -114,13 +123,19 @@ public class Application extends JPanel implements ActionListener
         exitButton.addActionListener(this);
         add(exitButton);
     }
-
+    
+    /**
+     * Setting the focus for the window.
+     */
     private void initBoard()                                            //Phase1
     {      
         setFocusable(true);
         setBackground(Color.black);//set background color to black
     }
-
+    
+    /**
+     * Initialize all variables.
+     */
     private void initVariables()                                        //Phase1
     {      
         screenData = new short[N_BLOCKS * N_BLOCKS];
@@ -144,7 +159,10 @@ public class Application extends JPanel implements ActionListener
         super.addNotify();
         initGame();
     }
-
+    
+    /**
+     * Pac-Man animation.
+     */
     private void doAnim()                                               //Phase1
     {             
         pacAnimCount--;
@@ -160,7 +178,11 @@ public class Application extends JPanel implements ActionListener
             }
         }
     }
-
+    
+    /**
+     * Runs the game.
+     * @param g2d Pac-Man graphics
+     */
     private void playGame(Graphics2D g2d)                               //Phase1
     {   
         if (dying) 
@@ -175,9 +197,16 @@ public class Application extends JPanel implements ActionListener
             checkMaze();
         }
     }
-
+    
+    /**
+     * Shows the intro screen.
+     * @param g Pac-Man graphics
+     */
     private void showIntroScreen(Graphics2D g)                        //Phase1
-    {      
+    {    
+    	//fixed buttons so they will work once game over happens.
+    	startButton.setVisible(true);
+        exitButton.setVisible(true);
         // Draw Pac-Man title
         g.setColor(Color.YELLOW);
         Font titleFont = new Font("Helvetica", Font.BOLD, 48);//set the font
@@ -206,7 +235,10 @@ public class Application extends JPanel implements ActionListener
         		/ 2, exitButton.getBounds().y + (exitButton.getHeight() + buttonMetrics.getAscent()) / 2);
     
     }
-
+    /**
+     * Draws the score.
+     * @param g Pac-Man graphics
+     */
     private void drawScore(Graphics2D g)                                //Phase1 
     {      
         int i;
@@ -229,7 +261,10 @@ public class Application extends JPanel implements ActionListener
             screenData[CHERRY_LOCATIONS[cherryIndex]] &= ~16;
         }
     }
-
+    
+    /**
+     * Checks to see if the maze has been completed.
+     */
     private void checkMaze()                                            //Phase2
     {
         short i = 0;
@@ -259,18 +294,25 @@ public class Application extends JPanel implements ActionListener
             initLevel();
         }
     }
-
+    
+    /**
+     * checks to see if Pac-Man has lives left, if not then it sets the game as over.
+     */
     private void death()                                                //Phase2
     {
         pacsLeft--;
-
+        //if Pac-Man has no more lives the game is over.
         if (pacsLeft == 0) 
         {
             inGame = false;
         }
         continueLevel();
     }
-
+    
+    /**
+     * Moves the ghosts. if a ghost touchs Pac-Man then set Pac-Man to dying.
+     * @param g2d Pac-Man graphics
+     */
     private void moveGhosts(Graphics2D g2d)                             //Phase2
     {
         short n;
@@ -411,11 +453,20 @@ public class Application extends JPanel implements ActionListener
         }
     }
     
+    /**
+     * Draws the ghost at the x and y position.
+     * @param g2d Pac-Man graphics
+     * @param x position of ghost on x axis
+     * @param y position of ghost on y axis
+     */
     private void drawGhost(Graphics2D g2d, int x, int y)                //Phase2
     {
         g2d.drawImage(ghost, x, y, this);
     }
-
+    
+    /**
+     * Moves Pac-Man according to the user input.
+     */
     private void movePacman()                                           //Phase2
     {
         int pos;
@@ -483,6 +534,10 @@ public class Application extends JPanel implements ActionListener
         pacman_y = pacman_y + PACMAN_SPEED * pacmand_y;
     }
     
+    /**
+     * Draws Pac-Man direction
+     * @param g2d Pac-Man graphics
+     */
     private void drawPacman(Graphics2D g2d)                             //Phase2
     {
         if (view_dx == -1) 
@@ -502,7 +557,11 @@ public class Application extends JPanel implements ActionListener
             drawPacmanDown(g2d);
         }
     }
-
+    
+    /**
+     * Draws Pac-man's animation while going up.
+     * @param g2d Pac-Man graphics.
+     */
     private void drawPacmanUp(Graphics2D g2d)                           //Phase2
     {
         switch (pacmanAnimPos) 
@@ -521,7 +580,11 @@ public class Application extends JPanel implements ActionListener
                 break;
         }
     }
-
+    
+    /**
+     * Draws Pac-man's animation while going down.
+     * @param g2d Pac-Man graphics.
+     */
     private void drawPacmanDown(Graphics2D g2d)                         //Phase2
     {
         switch (pacmanAnimPos) 
@@ -540,7 +603,11 @@ public class Application extends JPanel implements ActionListener
                 break;
         }
     }
-
+    
+    /**
+     * Draws Pac-man's animation while going left.
+     * @param g2d Pac-Man graphics.
+     */
     private void drawPacmanLeft(Graphics2D g2d)                         //Phase2
     {
         switch (pacmanAnimPos) 
@@ -559,7 +626,11 @@ public class Application extends JPanel implements ActionListener
                 break;
         }
     }
-
+    
+    /**
+     * Draws Pac-man's animation while going right.
+     * @param g2d Pac-Man graphics.
+     */
     private void drawPacmanRight(Graphics2D g2d)                        //Phase2
     {
         switch (pacmanAnimPos) 
@@ -578,7 +649,11 @@ public class Application extends JPanel implements ActionListener
                 break;
         }
     }
-
+    
+    /**
+     * Draws the maze using the level data.
+     * @param g2d Pac-Man graphics.
+     */
     private void drawMaze(Graphics2D g2d) 
     {
         short i = 0;
@@ -622,7 +697,10 @@ public class Application extends JPanel implements ActionListener
             }
         }
     }
-
+    
+    /**
+     * Starts the game.
+     */
     private void initGame() 
     {
         pacsLeft = 3;
@@ -631,7 +709,10 @@ public class Application extends JPanel implements ActionListener
         N_GHOSTS = 6;
         currentSpeed = 3;
     }
-
+    
+    /**
+     * Initializes  the level data in to screen data.
+     */
     private void initLevel() {
         int i;
         for (i = 0; i < N_BLOCKS * N_BLOCKS; i++) {
@@ -641,7 +722,10 @@ public class Application extends JPanel implements ActionListener
         cherryCollected = new boolean[CHERRY_LOCATIONS.length]; 
         continueLevel();
     }
-
+    
+    /**
+     * Continues the level. called every frame.
+     */
     private void continueLevel() 
     {
         short i;
@@ -676,7 +760,9 @@ public class Application extends JPanel implements ActionListener
         dying = false;
     }
     
-    //method to load all images
+    /**
+     * Loads the Images.
+     */
     private void loadImages() 
     {
         ghost = new ImageIcon("src/ghost.gif").getImage();
@@ -696,14 +782,22 @@ public class Application extends JPanel implements ActionListener
         pacman3right = new ImageIcon("src/right2.png").getImage();
         pacman4right = new ImageIcon("src/right3.png").getImage();
     }
-
+    
+    /**
+     * overrides the paintComponent method to make it call the doDrawing method.
+     * @param g2d Pac-Man graphics.
+     */
     @Override
     public void paintComponent(Graphics g) 
     {
         super.paintComponent(g);
         doDrawing(g);
     }
-
+    
+    /**
+     * Does all the drawing for the game.
+     * @param g Pac-Man graphics.
+     */
     private void doDrawing(Graphics g){                      //Phase 3 
     	Graphics2D g2d = (Graphics2D) g;
 
@@ -728,9 +822,16 @@ public class Application extends JPanel implements ActionListener
         Toolkit.getDefaultToolkit().sync();
         g2d.dispose();
     }
-
+    
+    /**
+     * This class is used to get user input.
+     */
     class TAdapter extends KeyAdapter {
-    @Override
+    	
+    	/**
+    	 * Gets the user input to move Pac-Man.
+    	 */
+    	@Override
     	public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
 
@@ -773,6 +874,10 @@ public class Application extends JPanel implements ActionListener
                 }
             }          
         }
+    	
+    	/**
+    	 * gets user input upon button release.
+    	 */
         @Override
         public void keyReleased(KeyEvent e) {
             int key = e.getKeyCode();
@@ -785,7 +890,10 @@ public class Application extends JPanel implements ActionListener
             }
         }
     }
-
+    
+    /**
+     * Gets user input for when they click on either the start or exit button.
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == startButton) {
@@ -794,6 +902,7 @@ public class Application extends JPanel implements ActionListener
             initGame();
             startButton.setVisible(false);
             exitButton.setVisible(false);
+            System.out.println("Start button clicked");
 
         } else if (e.getSource() == exitButton) {
             inGame = false; // Exit the game
