@@ -18,7 +18,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JButton;
@@ -102,11 +105,19 @@ public class Application extends JPanel implements ActionListener
     private JButton exitButton;
     private int numCherriesCollected;
     
+    // Variables for audio clips
+    private Clip clipMain;
+    private Clip clipAudio;
+    
+    
+   
+    
     /**
      * Constructor
      */
     public Application()                                                //Phase1
     {
+    	createClip();
         loadImages();
         initVariables();    
         initBoard();
@@ -123,6 +134,8 @@ public class Application extends JPanel implements ActionListener
         exitButton.setBounds(100, 200, 100, 30);
         exitButton.addActionListener(this);
         add(exitButton);
+        
+        
     }
     
     /**
@@ -196,6 +209,9 @@ public class Application extends JPanel implements ActionListener
             drawPacman(g2d);
             moveGhosts(g2d);
             checkMaze();
+            
+            // Starts game audio
+            playSound(); 
         }
     }
     
@@ -234,6 +250,9 @@ public class Application extends JPanel implements ActionListener
         		/ 2, startButton.getBounds().y + (startButton.getHeight() + buttonMetrics.getAscent()) / 2);
         g.drawString("Exit", exitButton.getBounds().x + (exitButton.getWidth() - buttonMetrics.stringWidth("Exit")) 
         		/ 2, exitButton.getBounds().y + (exitButton.getHeight() + buttonMetrics.getAscent()) / 2);
+        
+        // Starts audio for main screen
+        playSound();
     
     }
     /**
@@ -804,39 +823,27 @@ public class Application extends JPanel implements ActionListener
      * @param g Pac-Man graphics.
      */
     private void doDrawing(Graphics g){                      //Phase 3 
-    	//Create graphic object.
     	Graphics2D g2d = (Graphics2D) g;
-    	
-    	// Set color to black.
+
         g2d.setColor(Color.black);
         g2d.fillRect(0, 0, dimension.width, dimension.height);
-        
-        // Calls functions to draw maze.
+
         drawMaze(g2d);
-        
-        // Calls function to draw score.
         drawScore(g2d);
-        
-        // Calls function to animate.
         doAnim();
-        
-        // Checks if PacMan is alive and has any lives left.
+
         if (inGame) 
         {
             playGame(g2d);
             drawCherries(g2d);
         } 
-        // If no lives left, exit to intro screen.
         else 
         {
             showIntroScreen(g2d);
         }
-        
-        // Draws image at specific location
+
         g2d.drawImage(image, 5, 5, this);
         Toolkit.getDefaultToolkit().sync();
-        
-        // Dispose graphics context. 
         g2d.dispose();
     }
     
@@ -919,7 +926,6 @@ public class Application extends JPanel implements ActionListener
             initGame();
             startButton.setVisible(false);
             exitButton.setVisible(false);
-            System.out.println("Start button clicked");
 
         } else if (e.getSource() == exitButton) {
             inGame = false; // Exit the game
@@ -927,4 +933,65 @@ public class Application extends JPanel implements ActionListener
         }
         repaint();
     }
+    
+
+    
+    /**
+     * Creates clip from audio files
+     */
+    public void createClip()
+    {
+    	try
+    	{
+    		// Created main clip
+    		clipMain = AudioSystem.getClip();
+        	clipMain.open(AudioSystem.getAudioInputStream(new File("src/main.wav")));
+        	
+        	// Creates game clip
+        	clipAudio = AudioSystem.getClip();
+        	clipAudio.open(AudioSystem.getAudioInputStream(new File("src/audio.wav")));
+    		
+    	}
+    	catch (Exception exc)
+    	{
+        	exc.printStackTrace(System.out);
+   		}
+    }
+    
+    /**
+     * Plays audio clips 
+     */
+    public void playSound()
+    {
+    	try
+    	{
+    		  		
+    		if (inGame == false)
+    		{
+    			// Stops other audio
+    			clipAudio.stop();
+    			
+    			// Starts new audio
+            	clipMain.start();
+            	clipMain.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
+            	
+    		}
+    		if(inGame == true)
+    		{
+    			// Stops other audio
+    			clipMain.stop();
+    		
+    			// Starts new audio
+    			clipAudio.start();
+    			clipAudio.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
+    		}  	
+        	
+    	}
+    	catch (Exception exc)
+    	{
+        	exc.printStackTrace(System.out);
+   		}
+    }
+    
+    
 }
