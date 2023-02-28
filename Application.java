@@ -396,7 +396,7 @@ public class Application extends JPanel implements ActionListener
 
             ghost_x[n] = ghost_x[n] + (ghost_dx[n] * ghostSpeed[n]);
             ghost_y[n] = ghost_y[n] + (ghost_dy[n] * ghostSpeed[n]);
-            drawGhost(g2d, ghost_x[n] + 1, ghost_y[n] + 1);
+            drawGhost(g2d, n, ghost_x[n] + 1, ghost_y[n] + 1);
 
             if (pacman_x > (ghost_x[n] - 12) && pacman_x < (ghost_x[n] + 12)
                     && pacman_y > (ghost_y[n] - 12) && pacman_y < (ghost_y[n] + 12)
@@ -456,12 +456,13 @@ public class Application extends JPanel implements ActionListener
     /**
      * Draws the ghost at the x and y position.
      * @param g2d Pac-Man graphics
+     * @param n identifier of ghost being drawn
      * @param x position of ghost on x axis
      * @param y position of ghost on y axis
      */
-    private void drawGhost(Graphics2D g2d, int x, int y)                //Phase2
+    private void drawGhost(Graphics2D g2d, int n, int x, int y)                //Phase2
     {
-        g2d.drawImage(ghost, x, y, this);
+        g2d.drawImage(ghost[n], x, y, this);
     }
     
     /**
@@ -765,7 +766,10 @@ public class Application extends JPanel implements ActionListener
      */
     private void loadImages() 
     {
-        ghost = new ImageIcon("src/ghost.gif").getImage();
+        for (int n = 0; n < N_GHOSTS; n++)
+        {
+            ghost[n] = new ImageIcon("src/ghost"+ n + ".gif").getImage();
+        }
         cherry = new ImageIcon("src/cherries.png").getImage();
         pacman1 = new ImageIcon("src/pacman.png").getImage();
         heart = new ImageIcon("src/heart.png").getImage();
