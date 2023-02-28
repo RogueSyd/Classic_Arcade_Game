@@ -57,7 +57,8 @@ public class Application extends JPanel implements ActionListener
     private int[] dx, dy;
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
 
-    private Image ghost,heart, cherry;
+    private Image[] ghost = new Image[N_GHOSTS];
+    private Image heart, cherry;
     private Image pacman1, pacman2up, pacman2left, pacman2right, pacman2down;
     private Image pacman3up, pacman3down, pacman3left, pacman3right;
     private Image pacman4up, pacman4down, pacman4left, pacman4right;
