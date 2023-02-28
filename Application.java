@@ -45,7 +45,7 @@ public class Application extends JPanel implements ActionListener
     private final int PAC_ANIM_DELAY = 2;
     private final int PACMAN_ANIM_COUNT = 4;
     private final int MAX_GHOSTS = 12;
-    private final int PACMAN_SPEED = 4; //Changed speed of Pac-Man since he was to speedy to control.
+    private final int PACMAN_SPEED = 4; 
    
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
@@ -255,9 +255,10 @@ public class Application extends JPanel implements ActionListener
         // check if the character is on a cherry
         int cherryIndex = isOnCherry();
         if (cherryIndex != -1 && !cherryCollected[cherryIndex]) {
-            // add 50 points and set the cherry as collected
-            score += 50;
-            cherryCollected[cherryIndex] = true;
+            // add 100 points
+            score += 100;
+            cherryCollected[cherryIndex] = true;// set the cherry as collected
+            //removes the cherry from screen
             screenData[CHERRY_LOCATIONS[cherryIndex]] &= ~16;
         }
     }
@@ -437,7 +438,6 @@ public class Application extends JPanel implements ActionListener
                 //if the character collides with the heart
                 if (pacman_x == x && pacman_y == y) {
                     if ((screenData[location] & 32) == 0) {
-                        score += 50; // Add 50 points
                         cherryCollected[i] = true; // Set the cherry as collected
                         //executes it if the cherry hasn't been collected yet
                         screenData[location] &= ~16;
