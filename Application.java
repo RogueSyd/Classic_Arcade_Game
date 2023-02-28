@@ -804,27 +804,39 @@ public class Application extends JPanel implements ActionListener
      * @param g Pac-Man graphics.
      */
     private void doDrawing(Graphics g){                      //Phase 3 
+    	//Create graphic object.
     	Graphics2D g2d = (Graphics2D) g;
-
+    	
+    	// Set color to black.
         g2d.setColor(Color.black);
         g2d.fillRect(0, 0, dimension.width, dimension.height);
-
+        
+        // Calls functions to draw maze.
         drawMaze(g2d);
+        
+        // Calls function to draw score.
         drawScore(g2d);
+        
+        // Calls function to animate.
         doAnim();
-
+        
+        // Checks if PacMan is alive and has any lives left.
         if (inGame) 
         {
             playGame(g2d);
             drawCherries(g2d);
         } 
+        // If no lives left, exit to intro screen.
         else 
         {
             showIntroScreen(g2d);
         }
-
+        
+        // Draws image at specific location
         g2d.drawImage(image, 5, 5, this);
         Toolkit.getDefaultToolkit().sync();
+        
+        // Dispose graphics context. 
         g2d.dispose();
     }
     
@@ -916,4 +928,3 @@ public class Application extends JPanel implements ActionListener
         repaint();
     }
 }
-
