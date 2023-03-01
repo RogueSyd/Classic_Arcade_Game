@@ -482,6 +482,10 @@ public class Application extends JPanel implements ActionListener
      */
     private void drawGhost(Graphics2D g2d, int n, int x, int y)                //Phase2
     {
+        if (n >= 6)
+        {
+            n = n - 6;
+        }
         g2d.drawImage(ghost[n], x, y, this);
     }
     
