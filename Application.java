@@ -3,17 +3,14 @@ Pac-Man Application: Phase 3 Source
 CMSC 495 
 Instructor: Shanna Kuchenbecker 
 John Borra, Sarah Drury, Oanh Woodworth, Yeng Veng, and Thayne Emery
+--------------------------------------------------------------------------------
+Reference:
+
+Gaspar Coding. (2020, September 4). Pacman in Java, Programming Tutorial 1/2 [Video]. 
+YouTube. https://www.youtube.com/watch?v=ATz7bIqOjiA
+
 */
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -31,10 +28,9 @@ public class Application extends JPanel implements ActionListener
 {
     private Dimension dimension;
     private final Font smallFont = new Font("Helvetica", Font.BOLD,14);
-
+    private Color mazeColor;
     private Image image;
     private final Color dotColor = new Color(192, 192, 0);
-    private Color mazeColor;
 
     private boolean inGame = false;
     private boolean dying = false;
@@ -60,7 +56,7 @@ public class Application extends JPanel implements ActionListener
     private int[] dx, dy;
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
 
-    private Image[] ghost = new Image[N_GHOSTS];
+    private final Image[] ghost = new Image[N_GHOSTS];
     private Image heart, cherry;
     private Image pacman1, pacman2up, pacman2left, pacman2right, pacman2down;
     private Image pacman3up, pacman3down, pacman3left, pacman3right;
@@ -96,21 +92,16 @@ public class Application extends JPanel implements ActionListener
 
     private final int validSpeeds[] = {1, 2, 3, 4, 6, 8};
     private final int maxSpeed = 6;
-
     private int currentSpeed = 3;
     private short[] screenData;
     private Timer timer;
 
-    private JButton startButton;
-    private JButton exitButton;
+    private JButton startButton,exitButton;
     private int numCherriesCollected;
     
     // Variables for audio clips
     private Clip clipMain;
     private Clip clipAudio;
-    
-    
-   
     
     /**
      * Constructor
@@ -121,21 +112,20 @@ public class Application extends JPanel implements ActionListener
         loadImages();
         initVariables();    
         initBoard();
-        addKeyListener(new TAdapter());//add keys controller
+        addKeyListener(new TAdapter());                    //add keys controller
         
-        //create Start and Exit Buttons
+        //create Start Buttons
         setLayout(null);
         startButton = new JButton("Start");
         startButton.setBounds(100, 150, 100, 30);
         startButton.addActionListener(this);
         add(startButton);
-
+        
+        //create Exit Buttons
         exitButton = new JButton("Exit");
         exitButton.setBounds(100, 200, 100, 30);
         exitButton.addActionListener(this);
         add(exitButton);
-        
-        
     }
     
     /**
@@ -151,14 +141,15 @@ public class Application extends JPanel implements ActionListener
      * Initialize all variables.
      */
     private void initVariables()                                        //Phase1
-    {      
-        screenData = new short[N_BLOCKS * N_BLOCKS];
-        mazeColor = new Color(5, 100, 5);
-        dimension = new Dimension(400, 400);
+    {
         ghost_x = new int[MAX_GHOSTS];
         ghost_dx = new int[MAX_GHOSTS];
         ghost_y = new int[MAX_GHOSTS];
         ghost_dy = new int[MAX_GHOSTS];
+        screenData = new short[N_BLOCKS * N_BLOCKS];
+        mazeColor = new Color(5, 100, 5);
+        dimension = new Dimension(400, 400);
+
         ghostSpeed = new int[MAX_GHOSTS];
         dx = new int[4];
         dy = new int[4];  
@@ -219,19 +210,19 @@ public class Application extends JPanel implements ActionListener
      * Shows the intro screen.
      * @param g Pac-Man graphics
      */
-    private void showIntroScreen(Graphics2D g)                        //Phase1
+    private void introScreen(Graphics2D g)                              //Phase1
     {    
     	//fixed buttons so they will work once game over happens.
     	startButton.setVisible(true);
         exitButton.setVisible(true);
         // Draw Pac-Man title
         g.setColor(Color.YELLOW);
-        Font titleFont = new Font("Helvetica", Font.BOLD, 48);//set the font
+        Font titleFont = new Font("Helvetica", Font.BOLD, 48);    //set the font
         g.setFont(titleFont);
         FontMetrics titleMetrics = g.getFontMetrics(titleFont);
         String title = "Pac-Man"; 
         g.drawString(title, (getWidth() - titleMetrics.stringWidth(title)) / 2, 
-        		getHeight() / 3);//draw the title
+            getHeight() / 3);                                   //draw the title
                 
         // Draw Start and Exit buttons
         Font buttonFont = new Font("Helvetica", Font.PLAIN, 24);
@@ -247,14 +238,14 @@ public class Application extends JPanel implements ActionListener
 
         g.setColor(Color.BLACK);
         g.drawString("Start", startButton.getBounds().x + (startButton.getWidth() - buttonMetrics.stringWidth("Start")) 
-        		/ 2, startButton.getBounds().y + (startButton.getHeight() + buttonMetrics.getAscent()) / 2);
+            / 2, startButton.getBounds().y + (startButton.getHeight() + buttonMetrics.getAscent()) / 2);
         g.drawString("Exit", exitButton.getBounds().x + (exitButton.getWidth() - buttonMetrics.stringWidth("Exit")) 
-        		/ 2, exitButton.getBounds().y + (exitButton.getHeight() + buttonMetrics.getAscent()) / 2);
+            / 2, exitButton.getBounds().y + (exitButton.getHeight() + buttonMetrics.getAscent()) / 2);
         
         // Starts audio for main screen
         playSound();
-    
     }
+    
     /**
      * Draws the score.
      * @param g Pac-Man graphics
@@ -269,15 +260,17 @@ public class Application extends JPanel implements ActionListener
         s = "SCORE:  " + score;
         g.drawString(s, SCREEN_SIZE / 2 + 96, SCREEN_SIZE + 16);
 
-        for (i = 0; i < pacsLeft; i++) {
+        for (i = 0; i < pacsLeft; i++) 
+        {
             g.drawImage(heart, i * 28 + 8, SCREEN_SIZE + 1, this);
         }
         // check if the character is on a cherry
         int cherryIndex = isOnCherry();
-        if (cherryIndex != -1 && !cherryCollected[cherryIndex]) {
+        if (cherryIndex != -1 && !cherryCollected[cherryIndex]) 
+        {
             // add 100 points
             score += 100;
-            cherryCollected[cherryIndex] = true;// set the cherry as collected
+            cherryCollected[cherryIndex] = true;  // set the cherry as collected
             //removes the cherry from screen
             screenData[CHERRY_LOCATIONS[cherryIndex]] &= ~16;
         }
@@ -285,6 +278,7 @@ public class Application extends JPanel implements ActionListener
     
     /**
      * Checks to see if the maze has been completed.
+     * Reference: Gaspar Coding. (2020, September 4).
      */
     private void checkMaze()                                            //Phase2
     {
@@ -317,7 +311,7 @@ public class Application extends JPanel implements ActionListener
     }
     
     /**
-     * checks to see if Pac-Man has lives left, if not then it sets the game as over.
+     * checks to see if Pac-Man has lives left, if not then the game as over.
      */
     private void death()                                                //Phase2
     {
@@ -333,6 +327,7 @@ public class Application extends JPanel implements ActionListener
     /**
      * Moves the ghosts. if a ghost touchs Pac-Man then set Pac-Man to dying.
      * @param g2d Pac-Man graphics
+     * Reference: Gaspar Coding. (2020, September 4).
      */
     private void moveGhosts(Graphics2D g2d)                             //Phase2
     {
@@ -345,7 +340,6 @@ public class Application extends JPanel implements ActionListener
             if (ghost_x[n] % BLOCK_SIZE == 0 && ghost_y[n] % BLOCK_SIZE == 0) 
             {
                 pos = ghost_x[n] / BLOCK_SIZE + N_BLOCKS * (int) (ghost_y[n] / BLOCK_SIZE);
-
                 count = 0;
 
                 if ((screenData[pos] & 1) == 0 && ghost_dx[n] != 1) 
@@ -428,15 +422,19 @@ public class Application extends JPanel implements ActionListener
     }
     
     // method to check if the character is on a cherry location
-    private int isOnCherry() {
+    private int isOnCherry() 
+    {
         int pacRow = pacman_y / BLOCK_SIZE;
         int pacCol = pacman_x / BLOCK_SIZE;
-        for (int i = 0; i < CHERRY_LOCATIONS.length; i++) {
+        for (int i = 0; i < CHERRY_LOCATIONS.length; i++) 
+        {
             int location = CHERRY_LOCATIONS[i];
-            if (location != -1 && !cherryCollected[i]) {
+            if (location != -1 && !cherryCollected[i]) 
+            {
                 int row = location / N_BLOCKS;
                 int col = location % N_BLOCKS;
-                if (pacRow == row && pacCol == col) {
+                if (pacRow == row && pacCol == col) 
+                {
                     return i;
                 }
             }
@@ -445,27 +443,36 @@ public class Application extends JPanel implements ActionListener
     }
     
     //method draws cherry images
-    private void drawCherries(Graphics2D g2d) {                      //phase3
+    private void drawCherries(Graphics2D g2d)                           //phase3
+    {                         
         Image cherryImage = cherry;
         // loop to draw 4 cherries
-        for (int i = 0; i < CHERRY_LOCATIONS.length; i++) {
+        for (int i = 0; i < CHERRY_LOCATIONS.length; i++) 
+        {
             int location = CHERRY_LOCATIONS[i];
-            if (location != -1 && !cherryCollected[i]) {
+            if (location != -1 && !cherryCollected[i]) 
+            {
                 int row = location / N_BLOCKS;
                 int col = location % N_BLOCKS;
                 int x = col * BLOCK_SIZE + BLOCK_SIZE / 2;
                 int y = row * BLOCK_SIZE + BLOCK_SIZE / 2;
+                
                 //if the character collides with the heart
-                if (pacman_x == x && pacman_y == y) {
-                    if ((screenData[location] & 32) == 0) {
+                if (pacman_x == x && pacman_y == y) 
+                {
+                    if ((screenData[location] & 32) == 0) 
+                    {
                         cherryCollected[i] = true; // Set the cherry as collected
                         //executes it if the cherry hasn't been collected yet
                         screenData[location] &= ~16;
                         numCherriesCollected++;
                     }
-                } else {
+                } 
+                else 
+                {
                     // Draw the cherry image only if it hasn't been collected yet
-                    if ((screenData[location] & 16) != 0) {
+                    if ((screenData[location] & 16) != 0) 
+                    {
                         g2d.drawImage(cherryImage, col * BLOCK_SIZE, row * BLOCK_SIZE, this);
                     }
                 }
@@ -480,7 +487,7 @@ public class Application extends JPanel implements ActionListener
      * @param x position of ghost on x axis
      * @param y position of ghost on y axis
      */
-    private void drawGhost(Graphics2D g2d, int n, int x, int y)                //Phase2
+    private void drawGhost(Graphics2D g2d, int n, int x, int y)         //Phase2
     {
         if (n >= 6)
         {
@@ -491,6 +498,7 @@ public class Application extends JPanel implements ActionListener
     
     /**
      * Moves Pac-Man according to the user input.
+     * Reference: Gaspar Coding. (2020, September 4).
      */
     private void movePacman()                                           //Phase2
     {
@@ -529,7 +537,7 @@ public class Application extends JPanel implements ActionListener
                     view_dy = pacmand_y;
                 }
             }
-                                                        // standstill check
+            // standstill check
             if ((pacmand_x == -1 && pacmand_y == 0 && (ch & 1) != 0)
                     || (pacmand_x == 1 && pacmand_y == 0 && (ch & 4) != 0)
                     || (pacmand_x == 0 && pacmand_y == -1 && (ch & 2) != 0)
@@ -678,6 +686,7 @@ public class Application extends JPanel implements ActionListener
     /**
      * Draws the maze using the level data.
      * @param g2d Pac-Man graphics.
+     * Reference: Gaspar Coding. (2020, September 4).
      */
     private void drawMaze(Graphics2D g2d) 
     {
@@ -722,25 +731,15 @@ public class Application extends JPanel implements ActionListener
             }
         }
     }
-    
-    /**
-     * Starts the game.
-     */
-    private void initGame() 
-    {
-        pacsLeft = 3;
-        score = 0;
-        initLevel();
-        N_GHOSTS = 6;
-        currentSpeed = 3;
-    }
-    
+       
     /**
      * Initializes  the level data in to screen data.
      */
-    private void initLevel() {
+    private void initLevel() 
+    {
         int i;
-        for (i = 0; i < N_BLOCKS * N_BLOCKS; i++) {
+        for (i = 0; i < N_BLOCKS * N_BLOCKS; i++) 
+        {
             screenData[i] = levelData[i];
         }
         // Reset the cherryCollected array
@@ -750,8 +749,9 @@ public class Application extends JPanel implements ActionListener
     
     /**
      * Continues the level. called every frame.
+     * Reference: Gaspar Coding. (2020, September 4).
      */
-    private void continueLevel() 
+    private void continueLevel()                                       //Phase 3
     {
         short i;
         int dx = 1;
@@ -826,12 +826,11 @@ public class Application extends JPanel implements ActionListener
      * Does all the drawing for the game.
      * @param g Pac-Man graphics.
      */
-    private void doDrawing(Graphics g){                      //Phase 3 
+    private void doDrawing(Graphics g)                                 //Phase 3
+    {                                
     	Graphics2D g2d = (Graphics2D) g;
-
         g2d.setColor(Color.black);
         g2d.fillRect(0, 0, dimension.width, dimension.height);
-
         drawMaze(g2d);
         drawScore(g2d);
         doAnim();
@@ -843,7 +842,7 @@ public class Application extends JPanel implements ActionListener
         } 
         else 
         {
-            showIntroScreen(g2d);
+            introScreen(g2d);
         }
 
         g2d.drawImage(image, 5, 5, this);
@@ -854,16 +853,20 @@ public class Application extends JPanel implements ActionListener
     /**
      * This class is used to get user input.
      */
-    class TAdapter extends KeyAdapter { 	
-    	/**
-        * Responds to a key press event by updating the requested direction of movement or game state.
+    class TAdapter extends KeyAdapter 
+    {
+        /*
+        * Responds to a key release event by resetting the requested direction of movement.
         * @param e the key event
         */
     	@Override
-    	public void keyPressed(KeyEvent e) {
-    		int key = e.getKeyCode();
-    	    if (inGame) {
-    	        switch (key) {
+    	public void keyPressed(KeyEvent e) 
+        {
+            int key = e.getKeyCode();
+    	    if (inGame) 
+            {
+    	        switch (key) 
+                {
     	            case KeyEvent.VK_LEFT:
     	            case KeyEvent.VK_A:
     	                req_dx = -1;
@@ -885,14 +888,17 @@ public class Application extends JPanel implements ActionListener
     	                req_dy = 1;
     	                break;
     	            case KeyEvent.VK_ESCAPE:
-    	                if (timer.isRunning()) {
+    	                if (timer.isRunning()) 
+                        {
     	                    inGame = false;
     	                }
     	                break;
     	            case KeyEvent.VK_P:
-    	                if (timer.isRunning()) {
-    	                	timer.stop();
-    	                } else {
+    	                if (timer.isRunning()) 
+                        {
+                            timer.stop();
+    	                } else 
+                        {
     	                    timer.start();
     	                }
     	             break;
@@ -901,11 +907,11 @@ public class Application extends JPanel implements ActionListener
         }
     	
     	/**
-        * Responds to a key release event by resetting the requested direction of movement.
-        * @param e the key event
-         */
+    	 * gets user input upon button release.
+    	 */
         @Override
-        public void keyReleased(KeyEvent e) {
+        public void keyReleased(KeyEvent e) 
+        {
             int key = e.getKeyCode();
 
             if (key == Event.LEFT || key == Event.RIGHT
@@ -921,23 +927,24 @@ public class Application extends JPanel implements ActionListener
      * Gets user input for when they click on either the start or exit button.
      */
     @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == startButton) {
-        	requestFocusInWindow(); // set focus        
-        	inGame = true;// Start the game
+    public void actionPerformed(ActionEvent e) 
+    {
+        if (e.getSource() == startButton) 
+        {
+            requestFocusInWindow(); // set focus        
+            inGame = true;          // Start the game
             initGame();
             startButton.setVisible(false);
             exitButton.setVisible(false);
 
-        } else if (e.getSource() == exitButton) {
-            inGame = false; // Exit the game
-            System.exit(0); // Terminate the program
+        } else if (e.getSource() == exitButton) 
+        {
+            inGame = false;         // Exit the game
+            System.exit(0);         // Terminate the program
         }
         repaint();
     }
-    
-
-    
+      
     /**
      * Creates clip from audio files
      */
@@ -951,13 +958,12 @@ public class Application extends JPanel implements ActionListener
         	
         	// Creates game clip
         	clipAudio = AudioSystem.getClip();
-        	clipAudio.open(AudioSystem.getAudioInputStream(new File("src/audio.wav")));
-    		
+        	clipAudio.open(AudioSystem.getAudioInputStream(new File("src/audio.wav")));	
     	}
     	catch (Exception exc)
     	{
-        	exc.printStackTrace(System.out);
-   		}
+            exc.printStackTrace(System.out);
+        }
     }
     
     /**
@@ -966,34 +972,44 @@ public class Application extends JPanel implements ActionListener
     public void playSound()
     {
     	try
-    	{
-    		  		
-    		if (inGame == false)
-    		{
-    			// Stops other audio
-    			clipAudio.stop();
+    	{  		
+            if (inGame == false)
+            {
+                // Stops other audio
+                clipAudio.stop();
     			
-    			// Starts new audio
-            	clipMain.start();
-            	clipMain.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
-            	
-    		}
+                // Starts new audio
+                clipMain.start();
+                clipMain.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
+            }
     		if(inGame == true)
     		{
-    			// Stops other audio
-    			clipMain.stop();
+                    // Stops other audio
+                    clipMain.stop();
     		
-    			// Starts new audio
-    			clipAudio.start();
-    			clipAudio.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
-    		}  	
-        	
+                    // Starts new audio
+                    clipAudio.start();
+                    clipAudio.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
+    		}  	    	
     	}
     	catch (Exception exc)
     	{
-        	exc.printStackTrace(System.out);
-   		}
+            exc.printStackTrace(System.out);
+   	}
     }
+    
+    /**
+    * Starts the game.
+    */
+    private void initGame() 
+    {
+        pacsLeft = 3;
+        score = 0;
+        initLevel();
+        N_GHOSTS = 5;
+        currentSpeed = 3;
+    }
+}
     
     
 }
