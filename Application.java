@@ -513,7 +513,7 @@ public class Application extends JPanel implements ActionListener
             if ((ch & 16) != 0) 
             {
                 screenData[pos] = (short) (ch & 15);
-                score++;
+                score+=10;
             }
 
             if (req_dx != 0 || req_dy != 0) 
@@ -865,22 +865,22 @@ public class Application extends JPanel implements ActionListener
 
             if (inGame) 
             {
-                if (key == KeyEvent.VK_LEFT) 
+                if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A) 
                 {
                     req_dx = -1;
                     req_dy = 0;
                 } 
-                else if (key == KeyEvent.VK_RIGHT) 
+                else if (key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D) 
                 {
                     req_dx = 1;
                     req_dy = 0;
                 } 
-                else if (key == KeyEvent.VK_UP) 
+                else if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) 
                 {
                     req_dx = 0;
                     req_dy = -1;
                 } 
-                else if (key == KeyEvent.VK_DOWN) 
+                else if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S)  
                 {
                     req_dx = 0;
                     req_dy = 1;
