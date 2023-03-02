@@ -859,12 +859,24 @@ public class Application extends JPanel implements ActionListener
         * Responds to a key release event by resetting the requested direction of movement.
         * @param e the key event
         */
-    	@Override
+     	@Override
     	public void keyPressed(KeyEvent e) 
         {
             int key = e.getKeyCode();
     	    if (inGame) 
             {
+                if (key == KeyEvent.VK_ENTER && timer.isRunning())
+                {
+                    PACMAN_SPEED = 0;
+                    N_GHOSTS = 0;
+                    timer.stop();
+                }
+                else
+                {
+                    PACMAN_SPEED = 4;
+                    N_GHOSTS = 6;
+                    timer.start();
+                }    
     	        switch (key) 
                 {
     	            case KeyEvent.VK_LEFT:
@@ -893,15 +905,6 @@ public class Application extends JPanel implements ActionListener
     	                    inGame = false;
     	                }
     	                break;
-    	            case KeyEvent.VK_P:
-    	                if (timer.isRunning()) 
-                        {
-                            timer.stop();
-    	                } else 
-                        {
-    	                    timer.start();
-    	                }
-    	             break;
                 }
             }          
         }
