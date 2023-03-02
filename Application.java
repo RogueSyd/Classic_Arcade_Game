@@ -854,58 +854,56 @@ public class Application extends JPanel implements ActionListener
     /**
      * This class is used to get user input.
      */
-    class TAdapter extends KeyAdapter {
-    	
+    class TAdapter extends KeyAdapter { 	
     	/**
-    	 * Gets the user input to move Pac-Man.
-    	 */
+        * Responds to a key press event by updating the requested direction of movement or game state.
+        * @param e the key event
+        */
     	@Override
     	public void keyPressed(KeyEvent e) {
-            int key = e.getKeyCode();
-
-            if (inGame) 
-            {
-                if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A) 
-                {
-                    req_dx = -1;
-                    req_dy = 0;
-                } 
-                else if (key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D) 
-                {
-                    req_dx = 1;
-                    req_dy = 0;
-                } 
-                else if (key == KeyEvent.VK_UP || key == KeyEvent.VK_W) 
-                {
-                    req_dx = 0;
-                    req_dy = -1;
-                } 
-                else if (key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S)  
-                {
-                    req_dx = 0;
-                    req_dy = 1;
-                } 
-                else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) 
-                {
-                    inGame = false;
-                } 
-                else if (key == KeyEvent.VK_PAUSE) 
-                {
-                    if (timer.isRunning()) 
-                    {
-                        timer.stop();
-                    } 
-                    else 
-                    {
-                        timer.start();
-                    }
+    		int key = e.getKeyCode();
+    	    if (inGame) {
+    	        switch (key) {
+    	            case KeyEvent.VK_LEFT:
+    	            case KeyEvent.VK_A:
+    	                req_dx = -1;
+    	                req_dy = 0;
+    	                break;
+    	            case KeyEvent.VK_RIGHT:
+    	            case KeyEvent.VK_D:
+    	                req_dx = 1;
+    	                req_dy = 0;
+    	                break;
+    	            case KeyEvent.VK_UP:
+    	            case KeyEvent.VK_W:
+    	                req_dx = 0;
+    	                req_dy = -1;
+    	                break;
+    	            case KeyEvent.VK_DOWN:
+    	            case KeyEvent.VK_S:
+    	                req_dx = 0;
+    	                req_dy = 1;
+    	                break;
+    	            case KeyEvent.VK_ESCAPE:
+    	                if (timer.isRunning()) {
+    	                    inGame = false;
+    	                }
+    	                break;
+    	            case KeyEvent.VK_P:
+    	                if (timer.isRunning()) {
+    	                	timer.stop();
+    	                } else {
+    	                    timer.start();
+    	                }
+    	             break;
                 }
             }          
         }
     	
     	/**
-    	 * gets user input upon button release.
-    	 */
+        * Responds to a key release event by resetting the requested direction of movement.
+        * @param e the key event
+         */
         @Override
         public void keyReleased(KeyEvent e) {
             int key = e.getKeyCode();
