@@ -1010,6 +1010,3 @@ public class Application extends JPanel implements ActionListener
         currentSpeed = 3;
     }
 }
-    
-    
-}
