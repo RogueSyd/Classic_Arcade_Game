@@ -44,8 +44,8 @@ public class Application extends JPanel implements ActionListener
     private final int PAC_ANIM_DELAY = 2;
     private final int PACMAN_ANIM_COUNT = 4;
     private final int MAX_GHOSTS = 12;
-    private final int PACMAN_SPEED = 4; 
-   
+    
+    private int PACMAN_SPEED = 4; 
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
     private int pacmanAnimPos = 0;
@@ -258,7 +258,7 @@ public class Application extends JPanel implements ActionListener
         g.setFont(smallFont);
         g.setColor(new Color(26, 12, 255));
         s = "SCORE:  " + score;
-        g.drawString(s, SCREEN_SIZE / 2 + 96, SCREEN_SIZE + 16);
+        g.drawString(s, SCREEN_SIZE / 2 + 86, SCREEN_SIZE + 16);
 
         for (i = 0; i < pacsLeft; i++) 
         {
