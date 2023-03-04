@@ -26,13 +26,14 @@ import javax.swing.Timer;
 
 public class Application extends JPanel implements ActionListener 
 {
+    private enum Status { MAIN_MENU, IN_GAME, PAUSED, END_GAME }
+
     private Dimension dimension;
     private final Font smallFont = new Font("Helvetica", Font.BOLD,14);
     private Color mazeColor;
     private Image image;
     private final Color dotColor = new Color(192, 192, 0);
 
-    private boolean inGame = false;
     private boolean dying = false;
     
     //identify constant variables
@@ -44,19 +45,21 @@ public class Application extends JPanel implements ActionListener
     private final int PAC_ANIM_DELAY = 2;
     private final int PACMAN_ANIM_COUNT = 4;
     private final int MAX_GHOSTS = 12;
-    
+
+    private Status gameStatus = Status.MAIN_MENU;
     private int PACMAN_SPEED = 4; 
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
     private int pacmanAnimPos = 0;
     private int N_GHOSTS = 6;
+    private int currentGhosts = 0;
     private int pacsLeft, score;
     
     //position of ghosts
     private int[] dx, dy;
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
 
-    private final Image[] ghost = new Image[N_GHOSTS];
+    private final Image[] ghost = new Image[6];
     private Image heart, cherry;
     private Image pacman1, pacman2up, pacman2left, pacman2right, pacman2down;
     private Image pacman3up, pacman3down, pacman3left, pacman3right;
@@ -96,12 +99,11 @@ public class Application extends JPanel implements ActionListener
     private short[] screenData;
     private Timer timer;
 
-    private JButton startButton,exitButton;
+    private JButton startButton, exitButton;
     private int numCherriesCollected;
     
     // Variables for audio clips
-    private Clip clipMain;
-    private Clip clipAudio;
+    private Clip clipMain, clipAudio, clipDeath, clipCherry, clipLevel;
     
     /**
      * Constructor
@@ -215,12 +217,29 @@ public class Application extends JPanel implements ActionListener
     	//fixed buttons so they will work once game over happens.
     	startButton.setVisible(true);
         exitButton.setVisible(true);
+
+        String title, startText;
+        if (gameStatus == Status.MAIN_MENU)
+        {
+            title = "Pac-Man";
+            startText = "Start";
+        }
+        else if (gameStatus == Status.PAUSED)
+        {
+            title = "Paused...";
+            startText = "Resume";
+        }
+        else
+        {
+            title = "Score: " + score;
+            startText = "Restart";
+        }
+
         // Draw Pac-Man title
         g.setColor(Color.YELLOW);
         Font titleFont = new Font("Helvetica", Font.BOLD, 48);    //set the font
         g.setFont(titleFont);
         FontMetrics titleMetrics = g.getFontMetrics(titleFont);
-        String title = "Pac-Man"; 
         g.drawString(title, (getWidth() - titleMetrics.stringWidth(title)) / 2, 
             getHeight() / 3);                                   //draw the title
                 
@@ -237,7 +256,7 @@ public class Application extends JPanel implements ActionListener
         g.fillRect(exitButton.getBounds().x, exitButton.getBounds().y, 100, 30);
 
         g.setColor(Color.BLACK);
-        g.drawString("Start", startButton.getBounds().x + (startButton.getWidth() - buttonMetrics.stringWidth("Start")) 
+        g.drawString(startText, startButton.getBounds().x + (startButton.getWidth() - buttonMetrics.stringWidth(startText)) 
             / 2, startButton.getBounds().y + (startButton.getHeight() + buttonMetrics.getAscent()) / 2);
         g.drawString("Exit", exitButton.getBounds().x + (exitButton.getWidth() - buttonMetrics.stringWidth("Exit")) 
             / 2, exitButton.getBounds().y + (exitButton.getHeight() + buttonMetrics.getAscent()) / 2);
@@ -273,6 +292,17 @@ public class Application extends JPanel implements ActionListener
             cherryCollected[cherryIndex] = true;  // set the cherry as collected
             //removes the cherry from screen
             screenData[CHERRY_LOCATIONS[cherryIndex]] &= ~16;
+            try
+            {
+                // Play death clip
+                clipCherry = AudioSystem.getClip();
+                clipCherry.open(AudioSystem.getAudioInputStream(new File("src/cherry.wav")));
+                clipCherry.loop(0);;
+            }
+            catch (Exception exc)
+            {
+                exc.printStackTrace(System.out);
+            }
         }
     }
     
@@ -300,12 +330,31 @@ public class Application extends JPanel implements ActionListener
             if (N_GHOSTS < MAX_GHOSTS) 
             {
                 N_GHOSTS++;
+                currentGhosts = N_GHOSTS;
             }
 
             if (currentSpeed < maxSpeed) 
             {
                 currentSpeed++;
             }
+
+            if (pacsLeft < 3) 
+            {
+                pacsLeft++;
+            }
+
+            try
+            {
+                // Play death clip
+                clipLevel = AudioSystem.getClip();
+                clipLevel.open(AudioSystem.getAudioInputStream(new File("src/level.wav")));
+                clipLevel.loop(0);;
+            }
+            catch (Exception exc)
+            {
+                exc.printStackTrace(System.out);
+            }
+
             initLevel();
         }
     }
@@ -315,11 +364,23 @@ public class Application extends JPanel implements ActionListener
      */
     private void death()                                                //Phase2
     {
+        try
+    	{
+            // Play death clip
+        	clipDeath = AudioSystem.getClip();
+        	clipDeath.open(AudioSystem.getAudioInputStream(new File("src/death.wav")));
+            clipDeath.loop(0);;
+    	}
+    	catch (Exception exc)
+    	{
+            exc.printStackTrace(System.out);
+        }
+        
         pacsLeft--;
         //if Pac-Man has no more lives the game is over.
         if (pacsLeft == 0) 
         {
-            inGame = false;
+            gameStatus = Status.END_GAME;
         }
         continueLevel();
     }
@@ -335,7 +396,7 @@ public class Application extends JPanel implements ActionListener
         int pos;
         int count;
 
-        for (n = 0; n < N_GHOSTS; n++) 
+        for (n = 0; n < currentGhosts; n++) 
         {
             if (ghost_x[n] % BLOCK_SIZE == 0 && ghost_y[n] % BLOCK_SIZE == 0) 
             {
@@ -414,7 +475,7 @@ public class Application extends JPanel implements ActionListener
 
             if (pacman_x > (ghost_x[n] - 12) && pacman_x < (ghost_x[n] + 12)
                     && pacman_y > (ghost_y[n] - 12) && pacman_y < (ghost_y[n] + 12)
-                    && inGame) 
+                    && gameStatus == Status.IN_GAME) 
             {
                 dying = true;
             }
@@ -757,7 +818,7 @@ public class Application extends JPanel implements ActionListener
         int dx = 1;
         int random;
 
-        for (i = 0; i < N_GHOSTS; i++) 
+        for (i = 0; i < currentGhosts; i++) 
         {
             ghost_y[i] = 7 * BLOCK_SIZE;
             ghost_x[i] = 7 * BLOCK_SIZE;
@@ -790,7 +851,7 @@ public class Application extends JPanel implements ActionListener
      */
     private void loadImages() 
     {
-        for (int n = 0; n < N_GHOSTS; n++)
+        for (int n = 0; n < 6; n++)
         {
             ghost[n] = new ImageIcon("src/ghost"+ n + ".gif").getImage();
         }
@@ -835,7 +896,7 @@ public class Application extends JPanel implements ActionListener
         drawScore(g2d);
         doAnim();
 
-        if (inGame) 
+        if (gameStatus == Status.IN_GAME) 
         {
             playGame(g2d);
             drawCherries(g2d);
@@ -863,20 +924,8 @@ public class Application extends JPanel implements ActionListener
     	public void keyPressed(KeyEvent e) 
         {
             int key = e.getKeyCode();
-    	    if (inGame) 
+    	    if (gameStatus == Status.IN_GAME) 
             {
-                if (key == KeyEvent.VK_ENTER && timer.isRunning())
-                {
-                    PACMAN_SPEED = 0;
-                    N_GHOSTS = 0;
-                    timer.stop();
-                }
-                else
-                {
-                    PACMAN_SPEED = 4;
-                    N_GHOSTS = 6;
-                    timer.start();
-                }    
     	        switch (key) 
                 {
     	            case KeyEvent.VK_LEFT:
@@ -899,10 +948,22 @@ public class Application extends JPanel implements ActionListener
     	                req_dx = 0;
     	                req_dy = 1;
     	                break;
+                    case KeyEvent.VK_ENTER:
+    	                if (timer.isRunning()) 
+                        {
+                            PACMAN_SPEED = 0;
+                            currentGhosts = 0;
+                            timer.stop();
+                            gameStatus = Status.PAUSED;
+    	                }
+    	                break;
     	            case KeyEvent.VK_ESCAPE:
     	                if (timer.isRunning()) 
                         {
-    	                    inGame = false;
+                            PACMAN_SPEED = 0;
+                            currentGhosts = 0;
+                            timer.stop();
+                            gameStatus = Status.PAUSED;
     	                }
     	                break;
                 }
@@ -910,20 +971,10 @@ public class Application extends JPanel implements ActionListener
         }
     	
     	/**
-    	 * gets user input upon button release.
+    	 * Implemented method not used/required
     	 */
         @Override
-        public void keyReleased(KeyEvent e) 
-        {
-            int key = e.getKeyCode();
-
-            if (key == Event.LEFT || key == Event.RIGHT
-                    || key == Event.UP || key == Event.DOWN) 
-            {
-                req_dx = 0;
-                req_dy = 0;
-            }
-        }
+        public void keyReleased(KeyEvent e) {}
     }
     
     /**
@@ -934,16 +985,29 @@ public class Application extends JPanel implements ActionListener
     {
         if (e.getSource() == startButton) 
         {
-            requestFocusInWindow(); // set focus        
-            inGame = true;          // Start the game
-            initGame();
+            if (gameStatus == Status.PAUSED)
+            {
+                PACMAN_SPEED = 4;
+                currentGhosts = 6;
+                gameStatus = Status.IN_GAME;
+            }
+            else{
+                requestFocusInWindow(); // set focus        
+                currentGhosts = N_GHOSTS;
+                gameStatus = Status.IN_GAME;    // Start the game
+                initGame();
+            }
+            timer.start();
             startButton.setVisible(false);
             exitButton.setVisible(false);
-
-        } else if (e.getSource() == exitButton) 
+        }
+        else if (e.getSource() == exitButton) 
         {
-            inGame = false;         // Exit the game
-            System.exit(0);         // Terminate the program
+            if (gameStatus == Status.MAIN_MENU || gameStatus == Status.END_GAME)
+            {
+                System.exit(0);         // Terminate the program
+            }
+            gameStatus = Status.MAIN_MENU;     // Exit the game
         }
         repaint();
     }
@@ -961,7 +1025,7 @@ public class Application extends JPanel implements ActionListener
         	
         	// Creates game clip
         	clipAudio = AudioSystem.getClip();
-        	clipAudio.open(AudioSystem.getAudioInputStream(new File("src/audio.wav")));	
+        	clipAudio.open(AudioSystem.getAudioInputStream(new File("src/audio.wav")));
     	}
     	catch (Exception exc)
     	{
@@ -975,25 +1039,24 @@ public class Application extends JPanel implements ActionListener
     public void playSound()
     {
     	try
-    	{  		
-            if (inGame == false)
+    	{
+            if(gameStatus == Status.IN_GAME)
+    		{
+                    // Stops other audio
+                    clipMain.stop();
+                    // Starts new audio
+                    clipAudio.start();
+                    clipAudio.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
+    		}  	
+            else
             {
                 // Stops other audio
                 clipAudio.stop();
-    			
                 // Starts new audio
                 clipMain.start();
                 clipMain.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
             }
-    		if(inGame == true)
-    		{
-                    // Stops other audio
-                    clipMain.stop();
-    		
-                    // Starts new audio
-                    clipAudio.start();
-                    clipAudio.loop(Clip.LOOP_CONTINUOUSLY); // Loops sound continuously
-    		}  	    	
+    		    	
     	}
     	catch (Exception exc)
     	{
@@ -1009,7 +1072,8 @@ public class Application extends JPanel implements ActionListener
         pacsLeft = 3;
         score = 0;
         initLevel();
-        N_GHOSTS = 5;
+        N_GHOSTS = 6;
         currentSpeed = 3;
+        PACMAN_SPEED = 4;
     }
 }
