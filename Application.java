@@ -108,7 +108,7 @@ public class Application extends JPanel implements ActionListener
     private int numCherriesCollected;
     
     // Variables for audio clips
-    private Clip clipMain, clipAudio, clipDeath, clipBonus, clipLevel, clipGhost;
+    private Clip clipMain, clipAudio;
     
     /**
      * Constructor
@@ -297,17 +297,7 @@ public class Application extends JPanel implements ActionListener
             cherryCollected[cherryIndex] = true;  // set the cherry as collected
             //removes the cherry from screen
             screenData[CHERRY_LOCATIONS[cherryIndex]] &= ~16;
-            try
-            {
-                // Play bonus clip
-                clipBonus = AudioSystem.getClip();
-                clipBonus.open(AudioSystem.getAudioInputStream(new File("src/bonus.wav")));
-                clipBonus.loop(0);;
-            }
-            catch (Exception exc)
-            {
-                exc.printStackTrace(System.out);
-            }
+            playClip("bonus.wav");
         }
     }
     
@@ -348,17 +338,7 @@ public class Application extends JPanel implements ActionListener
                 pacsLeft++;
             }
 
-            try
-            {
-                // Play level clip
-                clipLevel = AudioSystem.getClip();
-                clipLevel.open(AudioSystem.getAudioInputStream(new File("src/level.wav")));
-                clipLevel.loop(0);;
-            }
-            catch (Exception exc)
-            {
-                exc.printStackTrace(System.out);
-            }
+            playClip("level.wav");
 
             initLevel();
         }
@@ -369,18 +349,7 @@ public class Application extends JPanel implements ActionListener
      */
     private void death()                                                //Phase2
     {
-        try
-    	{
-            // Play death clip
-        	clipDeath = AudioSystem.getClip();
-        	clipDeath.open(AudioSystem.getAudioInputStream(new File("src/death.wav")));
-            clipDeath.loop(0);;
-    	}
-    	catch (Exception exc)
-    	{
-            exc.printStackTrace(System.out);
-        }
-        
+        playClip("death.wav");
         pacsLeft--;
         //if Pac-Man has no more lives the game is over.
         if (pacsLeft == 0) 
@@ -493,17 +462,7 @@ public class Application extends JPanel implements ActionListener
                     ghost_x[n] = 7 * BLOCK_SIZE;
                     ghost_y[n] = 7 * BLOCK_SIZE;
                     score += 200;
-                    try
-                    {
-                        // Play eat ghost clip
-                        clipGhost = AudioSystem.getClip();
-                        clipGhost.open(AudioSystem.getAudioInputStream(new File("src/ghosteat.wav")));
-                        clipGhost.loop(0);;
-                    }
-                    catch (Exception exc)
-                    {
-                        exc.printStackTrace(System.out);
-                    }
+                    playClip("ghosteat.wav");
                 }
                 else
                 {
@@ -623,17 +582,7 @@ public class Application extends JPanel implements ActionListener
                 if (pos == 0 || pos == 14 || pos == 210 || pos == 224)
                 {
                     score += 40;
-                    try
-                    {
-                        // Play bonus clip
-                        clipBonus = AudioSystem.getClip();
-                        clipBonus.open(AudioSystem.getAudioInputStream(new File("src/bonus.wav")));
-                        clipBonus.loop(0);;
-                    }
-                    catch (Exception exc)
-                    {
-                        exc.printStackTrace(System.out);
-                    }
+                    playClip("bonus.wav");
                     vulnerable = true;
                     timeDelay = System.currentTimeMillis();
                 }
@@ -1132,6 +1081,21 @@ public class Application extends JPanel implements ActionListener
         }
     }
     
+    public void playClip(String fileName)
+    {
+        
+        try
+        {
+            Clip sound = AudioSystem.getClip();
+            sound.open(AudioSystem.getAudioInputStream(new File("src/" + fileName)));
+            sound.loop(0);;
+        }
+        catch (Exception exc)
+        {
+            exc.printStackTrace(System.out);
+        }
+    }
+
     /**
     * Starts the game.
     */
