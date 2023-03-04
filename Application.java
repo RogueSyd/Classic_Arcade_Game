@@ -7,7 +7,9 @@ John Borra, Sarah Drury, Oanh Woodworth, Yeng Veng, and Thayne Emery
 Reference:
 
 Gaspar Coding. (2020, September 4). Pacman in Java, Programming Tutorial 1/2 [Video]. 
-YouTube. https://www.youtube.com/watch?v=ATz7bIqOjiA
+    YouTube. https://www.youtube.com/watch?v=ATz7bIqOjiA
+Incredible Free Sound Effects. Mixkit. (2023). https://mixkit.co/free-sound-effects/ 
+Pac-Man Icons. Gifer. (n.d.). https://gifer.com/en/YMXv
 
 */
 import java.awt.*;
@@ -53,6 +55,8 @@ public class Application extends JPanel implements ActionListener
     private int pacmanAnimPos = 0;
     private int N_GHOSTS = 6;
     private int currentGhosts = 0;
+    private boolean vulnerable = false;
+    private long timeDelay;
     private int pacsLeft, score;
     
     //position of ghosts
@@ -60,6 +64,7 @@ public class Application extends JPanel implements ActionListener
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
 
     private final Image[] ghost = new Image[6];
+    private Image vulnerableGhost;
     private Image heart, cherry;
     private Image pacman1, pacman2up, pacman2left, pacman2right, pacman2down;
     private Image pacman3up, pacman3down, pacman3left, pacman3right;
@@ -103,7 +108,7 @@ public class Application extends JPanel implements ActionListener
     private int numCherriesCollected;
     
     // Variables for audio clips
-    private Clip clipMain, clipAudio, clipDeath, clipCherry, clipLevel;
+    private Clip clipMain, clipAudio, clipDeath, clipCherry, clipLevel, clipGhost;
     
     /**
      * Constructor
@@ -277,7 +282,7 @@ public class Application extends JPanel implements ActionListener
         g.setFont(smallFont);
         g.setColor(new Color(26, 12, 255));
         s = "SCORE:  " + score;
-        g.drawString(s, SCREEN_SIZE / 2 + 86, SCREEN_SIZE + 16);
+        g.drawString(s, SCREEN_SIZE / 2 + 76, SCREEN_SIZE + 16);
 
         for (i = 0; i < pacsLeft; i++) 
         {
@@ -294,7 +299,7 @@ public class Application extends JPanel implements ActionListener
             screenData[CHERRY_LOCATIONS[cherryIndex]] &= ~16;
             try
             {
-                // Play death clip
+                // Play cherry clip
                 clipCherry = AudioSystem.getClip();
                 clipCherry.open(AudioSystem.getAudioInputStream(new File("src/cherry.wav")));
                 clipCherry.loop(0);;
@@ -303,6 +308,8 @@ public class Application extends JPanel implements ActionListener
             {
                 exc.printStackTrace(System.out);
             }
+            vulnerable = true;
+            timeDelay = System.currentTimeMillis();
         }
     }
     
@@ -345,7 +352,7 @@ public class Application extends JPanel implements ActionListener
 
             try
             {
-                // Play death clip
+                // Play level clip
                 clipLevel = AudioSystem.getClip();
                 clipLevel.open(AudioSystem.getAudioInputStream(new File("src/level.wav")));
                 clipLevel.loop(0);;
@@ -471,13 +478,39 @@ public class Application extends JPanel implements ActionListener
 
             ghost_x[n] = ghost_x[n] + (ghost_dx[n] * ghostSpeed[n]);
             ghost_y[n] = ghost_y[n] + (ghost_dy[n] * ghostSpeed[n]);
+
+            if (vulnerable && System.currentTimeMillis() - timeDelay > 7000)
+            {
+                vulnerable = false;
+            }
+
             drawGhost(g2d, n, ghost_x[n] + 1, ghost_y[n] + 1);
 
             if (pacman_x > (ghost_x[n] - 12) && pacman_x < (ghost_x[n] + 12)
                     && pacman_y > (ghost_y[n] - 12) && pacman_y < (ghost_y[n] + 12)
                     && gameStatus == Status.IN_GAME) 
             {
-                dying = true;
+                if (vulnerable)
+                {
+                    ghost_x[n] = 7 * BLOCK_SIZE;
+                    ghost_y[n] = 7 * BLOCK_SIZE;
+                    score += 200;
+                    try
+                    {
+                        // Play eat ghost clip
+                        clipGhost = AudioSystem.getClip();
+                        clipGhost.open(AudioSystem.getAudioInputStream(new File("src/ghosteat.wav")));
+                        clipGhost.loop(0);;
+                    }
+                    catch (Exception exc)
+                    {
+                        exc.printStackTrace(System.out);
+                    }
+                }
+                else
+                {
+                    dying = true;
+                }
             }
         }
     }
@@ -554,7 +587,13 @@ public class Application extends JPanel implements ActionListener
         {
             n = n - 6;
         }
-        g2d.drawImage(ghost[n], x, y, this);
+        if (vulnerable)
+        {
+            g2d.drawImage(vulnerableGhost, x, y, this);
+        }
+        else {
+            g2d.drawImage(ghost[n], x, y, this);
+        }
     }
     
     /**
@@ -831,7 +870,10 @@ public class Application extends JPanel implements ActionListener
             {
                 random = currentSpeed;
             }
-
+            if (random >= maxSpeed)
+            {
+                random = maxSpeed - 1;
+            }
             ghostSpeed[i] = validSpeeds[random];
         }
 
@@ -844,6 +886,7 @@ public class Application extends JPanel implements ActionListener
         view_dx = -1;
         view_dy = 0;
         dying = false;
+        vulnerable = false;
     }
     
     /**
@@ -855,6 +898,7 @@ public class Application extends JPanel implements ActionListener
         {
             ghost[n] = new ImageIcon("src/ghost"+ n + ".gif").getImage();
         }
+        vulnerableGhost = new ImageIcon("src/vulnghost.gif").getImage();
         cherry = new ImageIcon("src/cherries.png").getImage();
         pacman1 = new ImageIcon("src/pacman.png").getImage();
         heart = new ImageIcon("src/heart.png").getImage();
@@ -988,11 +1032,12 @@ public class Application extends JPanel implements ActionListener
             if (gameStatus == Status.PAUSED)
             {
                 PACMAN_SPEED = 4;
-                currentGhosts = 6;
+                currentGhosts = N_GHOSTS;
                 gameStatus = Status.IN_GAME;
             }
             else{
-                requestFocusInWindow(); // set focus        
+                requestFocusInWindow(); // set focus    
+                N_GHOSTS = 6;    
                 currentGhosts = N_GHOSTS;
                 gameStatus = Status.IN_GAME;    // Start the game
                 initGame();
@@ -1061,7 +1106,7 @@ public class Application extends JPanel implements ActionListener
     	catch (Exception exc)
     	{
             exc.printStackTrace(System.out);
-   	}
+        }
     }
     
     /**
