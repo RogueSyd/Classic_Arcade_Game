@@ -108,7 +108,7 @@ public class Application extends JPanel implements ActionListener
     private int numCherriesCollected;
     
     // Variables for audio clips
-    private Clip clipMain, clipAudio, clipDeath, clipCherry, clipLevel, clipGhost;
+    private Clip clipMain, clipAudio, clipDeath, clipBonus, clipLevel, clipGhost;
     
     /**
      * Constructor
@@ -299,17 +299,15 @@ public class Application extends JPanel implements ActionListener
             screenData[CHERRY_LOCATIONS[cherryIndex]] &= ~16;
             try
             {
-                // Play cherry clip
-                clipCherry = AudioSystem.getClip();
-                clipCherry.open(AudioSystem.getAudioInputStream(new File("src/cherry.wav")));
-                clipCherry.loop(0);;
+                // Play bonus clip
+                clipBonus = AudioSystem.getClip();
+                clipBonus.open(AudioSystem.getAudioInputStream(new File("src/bonus.wav")));
+                clipBonus.loop(0);;
             }
             catch (Exception exc)
             {
                 exc.printStackTrace(System.out);
             }
-            vulnerable = true;
-            timeDelay = System.currentTimeMillis();
         }
     }
     
@@ -551,7 +549,7 @@ public class Application extends JPanel implements ActionListener
                 int x = col * BLOCK_SIZE + BLOCK_SIZE / 2;
                 int y = row * BLOCK_SIZE + BLOCK_SIZE / 2;
                 
-                //if the character collides with the heart
+                //if the character collides with the cherry
                 if (pacman_x == x && pacman_y == y) 
                 {
                     if ((screenData[location] & 32) == 0) 
@@ -622,6 +620,23 @@ public class Application extends JPanel implements ActionListener
             {
                 screenData[pos] = (short) (ch & 15);
                 score+=10;
+                if (pos == 0 || pos == 14 || pos == 210 || pos == 224)
+                {
+                    score += 40;
+                    try
+                    {
+                        // Play bonus clip
+                        clipBonus = AudioSystem.getClip();
+                        clipBonus.open(AudioSystem.getAudioInputStream(new File("src/bonus.wav")));
+                        clipBonus.loop(0);;
+                    }
+                    catch (Exception exc)
+                    {
+                        exc.printStackTrace(System.out);
+                    }
+                    vulnerable = true;
+                    timeDelay = System.currentTimeMillis();
+                }
             }
 
             if (req_dx != 0 || req_dy != 0) 
@@ -825,7 +840,15 @@ public class Application extends JPanel implements ActionListener
                 if ((screenData[i] & 16) != 0) 
                 {
                     g2d.setColor(dotColor);
-                    g2d.fillRect(x + 11, y + 11, 2, 2);
+                    if ((x == BLOCK_SIZE * 0 || x == BLOCK_SIZE * 14)
+                            && (y == BLOCK_SIZE * 0 || y == BLOCK_SIZE * 14))
+                    {
+                        g2d.fillRect(x + 10, y + 10, 5, 5);
+                    }
+                    else
+                    {
+                        g2d.fillRect(x + 11, y + 11, 2, 2);
+                    }
                 }
                 i++;
             }
