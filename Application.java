@@ -868,24 +868,27 @@ public class Application extends JPanel implements ActionListener
     {
         for (int n = 0; n < 6; n++)
         {
-            ghost[n] = new ImageIcon("src/ghost"+ n + ".gif").getImage();
+            ghost[n] = new ImageIcon("resources/ghost"+ n + ".gif").getImage();
         }
-        vulnerableGhost = new ImageIcon("src/vulnghost.gif").getImage();
-        cherry = new ImageIcon("src/cherries.png").getImage();
-        pacman1 = new ImageIcon("src/pacman.png").getImage();
-        heart = new ImageIcon("src/heart.png").getImage();
-        pacman2up = new ImageIcon("src/up1.png").getImage();
-        pacman3up = new ImageIcon("src/up2.png").getImage();
-        pacman4up = new ImageIcon("src/up3.png").getImage();
-        pacman2down = new ImageIcon("src/down1.png").getImage();
-        pacman3down = new ImageIcon("src/down2.png").getImage();
-        pacman4down = new ImageIcon("src/down3.png").getImage();
-        pacman2left = new ImageIcon("src/left1.png").getImage();
-        pacman3left = new ImageIcon("src/left2.png").getImage();
-        pacman4left = new ImageIcon("src/left3.png").getImage();
-        pacman2right = new ImageIcon("src/right1.png").getImage();
-        pacman3right = new ImageIcon("src/right2.png").getImage();
-        pacman4right = new ImageIcon("src/right3.png").getImage();
+        
+        //pacman1 = new ImageIcon(getClass().getClassLoader().getResource("pacman.png"));
+        
+        vulnerableGhost = new ImageIcon("resources/vulnghost.gif").getImage();
+        cherry = new ImageIcon("resources/cherries.png").getImage();
+        pacman1 = new ImageIcon("resources/pacman.png").getImage();
+        heart = new ImageIcon("resources/heart.png").getImage();
+        pacman2up = new ImageIcon("resources/up1.png").getImage();
+        pacman3up = new ImageIcon("resources/up2.png").getImage();
+        pacman4up = new ImageIcon("resources/up3.png").getImage();
+        pacman2down = new ImageIcon("resources/down1.png").getImage();
+        pacman3down = new ImageIcon("resources/down2.png").getImage();
+        pacman4down = new ImageIcon("resources/down3.png").getImage();
+        pacman2left = new ImageIcon("resources/left1.png").getImage();
+        pacman3left = new ImageIcon("resources/left2.png").getImage();
+        pacman4left = new ImageIcon("resources/left3.png").getImage();
+        pacman2right = new ImageIcon("resources/right1.png").getImage();
+        pacman3right = new ImageIcon("resources/right2.png").getImage();
+        pacman4right = new ImageIcon("resources/right3.png").getImage();
     }
     
     /**
@@ -1038,11 +1041,11 @@ public class Application extends JPanel implements ActionListener
     	{
     		// Created main clip
     		clipMain = AudioSystem.getClip();
-        	clipMain.open(AudioSystem.getAudioInputStream(new File("src/main.wav")));
+        	clipMain.open(AudioSystem.getAudioInputStream(new File("resources/main.wav")));
         	
         	// Creates game clip
         	clipAudio = AudioSystem.getClip();
-        	clipAudio.open(AudioSystem.getAudioInputStream(new File("src/audio.wav")));
+        	clipAudio.open(AudioSystem.getAudioInputStream(new File("resources/audio.wav")));
     	}
     	catch (Exception exc)
     	{
@@ -1087,7 +1090,7 @@ public class Application extends JPanel implements ActionListener
         try
         {
             Clip sound = AudioSystem.getClip();
-            sound.open(AudioSystem.getAudioInputStream(new File("src/" + fileName)));
+            sound.open(AudioSystem.getAudioInputStream(new File("resources/" + fileName)));
             sound.loop(0);;
         }
         catch (Exception exc)
