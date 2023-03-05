@@ -98,7 +98,7 @@ public class Application extends JPanel implements ActionListener
         25, 26, 26, 28, 8, 8, 8, 8, 8, 8, 8, 25, 26, 26, 28
     };
 
-    private final int validSpeeds[] = {1, 2, 3, 4, 6, 8};
+    private final int validSpeeds[] = {1, 2, 3, 4, 5, 6};
     private final int maxSpeed = 6;
     private int currentSpeed = 3;
     private short[] screenData;
@@ -1091,7 +1091,7 @@ public class Application extends JPanel implements ActionListener
         {
             Clip sound = AudioSystem.getClip();
             sound.open(AudioSystem.getAudioInputStream(new File("resources/" + fileName)));
-            sound.loop(0);;
+            sound.loop(0);
         }
         catch (Exception exc)
         {
@@ -1108,7 +1108,7 @@ public class Application extends JPanel implements ActionListener
         score = 0;
         initLevel();
         N_GHOSTS = 6;
-        currentSpeed = 3;
+        currentSpeed = 1;
         PACMAN_SPEED = 4;
     }
 }
